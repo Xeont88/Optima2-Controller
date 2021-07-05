@@ -1,0 +1,7 @@
+OptimaControl/.idea/
+OptimaControl/dist/
+OptimaControl/__pycache__/
+OptimaControl/build/
+*.spec
+*.exe
+
