@@ -1,18 +1,22 @@
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
-from PyQt5.QtCore import QIODevice
+from PyQt5.QtCore import QIODevice, QThread
+from time import sleep
+import threading
+import joystickapi
+import msvcrt
+import time
 
 # from PyQt5 import QRadioButton
 
 
+scenario_work = False
 
 axis_list = [0, 0, 0, 0, 0, 0, 0]
 
-
-
 app = QtWidgets.QApplication([])
 app.setStyle('Fusion')
-ui = uic.loadUi('Optima_2_controller_v0.5.ui')
+ui = uic.loadUi('Optima_2_controller_v0.6.ui')
 ui.setWindowTitle("Optima-2 Controller")
 
 serial = QSerialPort()
@@ -64,12 +68,6 @@ def refreshCOM():
 
 
 def serialSend(data):
-    # answer = serial.isBreakEnabled()
-    # print('answer =', answer)
-    # if answer:
-    #     ui.connectLabel.setText('Подключено')
-    # else:
-    #     ui.connectLabel.setText('Нет подключения')
 
     txs = ''
     for val in data:
@@ -155,7 +153,6 @@ def servoCheckBoxControl(val):
 
 # def servoSetFunc(servo):
 def servoSetFunc():
-    # TODO: поправить конечные положения шаговиков. -90, 90 и тд.
     try:
         if int(ui.lineEdit.text()) > 120:
             ui.lineEdit.selectAll()
@@ -237,7 +234,7 @@ ui.ejectButton.clicked.connect(onClose)
 
 # LED 13 control
 ui.checkBox_LED_13.stateChanged.connect(ledControll)
-ui.checkBox_LED_14.stateChanged.connect(ledControll)
+# ui.checkBox_LED_14.stateChanged.connect(ledControll)
 
 # Servos control
 ui.servoSlider1.valueChanged.connect(servoControl)
@@ -285,13 +282,103 @@ ui.radioButton_mute.toggled.connect(DFPlayer)
 
 servoControl()
 
+prject_name = 'newOptimaProject'
+
+
+def add_point_in_scenario():
+    ax1 = (ui.lineEdit.text())
+    ax2 = (ui.lineEdit_2.text())
+    ax3 = (ui.lineEdit_3.text())
+    ax4 = (ui.lineEdit_4.text())
+    ax5 = (ui.lineEdit_5.text())
+    ax6 = (ui.lineEdit_6.text())
+    carousel = (ui.lineEdit_7.text())
+
+    text = ax1 + ',' + ax2 + ',' + ax3 + ',' + ax4 + ',' + ax5 + ',' + ax6 + ',' + carousel + '\n'
+    print('add scenario point', text)
+    ui.textEditScenario.insertPlainText(text)
+
+
+# ui.textEdit.insertPlainText('text')
+
+def move_in_point(point):
+    print('point=',point)
+    # TODO: цикл выполняется пока все оси не дойдут до своих позиций
+    # while 1:
+    serialSend([1, point[0],
+                point[1],
+                point[2],
+                point[3],
+                point[4],
+                point[5],
+                0, 0])
+    # serial.update()
+    # print([1, point[0], point[1], point[2], point[3], point[4], point[5]])
+
+
+# def scenario_thread():
+#     sc_thread = threading.Thread(target=start_scenario)
+#     sc_thread.start()
+
+
+# def start_scenario():
+#     # print('thread')
+#     text = ui.textEditScenario.toPlainText()
+#     print(text)
+#     t = text.split('\n')
+#     # print(t)
+#     for line in t[-1]:
+#         # try:
+#         line = line.split(',')
+#         print('line', line)
+#         # sleep(3)
+#         # move_in_point(line)
+#         timer = threading.Timer(3, lambda: move_in_point(line))
+#         timer.start()
+#         # except:
+#         #     print('incorrect command in text edit')
+#         #     pass
+# ---------------------------------------------------------------------------
+
+
+
+
+class Thread(QThread):
+
+    def __init__(self):
+        super().__init__()
+
+    def run(self):
+        # print('thread')
+        text = ui.textEditScenario.toPlainText()
+        print(text)
+        t = text.split('\n')
+        # print(t)
+        for line in t[-1]:
+            # try:
+            line = line.split(',')
+            print('line', line)
+            sleep(3)
+            # move_in_point(line)
+            timer = threading.Timer(3, lambda: move_in_point(line))
+            timer.start()
+            # except:
+            #     print('incorrect command in text edit')
+            #     pass
+
+
+
+def scenario_thread():
+    # Создать новую тему
+    thread = Thread()
+    thread.start()
+
+
+ui.addPointButton.clicked.connect(add_point_in_scenario)
+ui.startScenarioButton.clicked.connect(scenario_thread)
+
 
 # Работа геймпада. Потоки, функции и мэйнлуп для работы геймпада
-import threading
-import joystickapi
-import msvcrt
-import time
-
 
 # def servoSetFunc(servo):
 def axisSetFunc():
@@ -347,10 +434,10 @@ def axisSetFunc():
             ui.lineEdit_5.insert('-90')
         ui.servoSlider5.setSliderPosition(int(axis_list[4]))
 
-        if int(axis_list[5]) > 90:
-            axis_list[5] = 90
+        if int(axis_list[5]) > 100:
+            axis_list[5] = 100
             ui.lineEdit_6.selectAll()
-            ui.lineEdit_6.insert('90')
+            ui.lineEdit_6.insert('100')
         if int(axis_list[5]) < 0:
             axis_list[5] = 0
             ui.lineEdit_6.selectAll()
@@ -372,7 +459,6 @@ def axisSetFunc():
 
 
 def binding_sticks(x, y, z):
-
     global axis_list
 
     if x[0] != 0:
@@ -380,9 +466,9 @@ def binding_sticks(x, y, z):
     if x[1] != 0:
         axis_list[1] -= round(x[1] / 32768)
     if y[0] != 0:
-        axis_list[2] += round(y[0] / 32768)
+        axis_list[3] += round(y[0] / 32768)
     if y[1] != 0:
-        axis_list[3] -= round(y[1] / 32768)
+        axis_list[2] -= round(y[1] / 32768)
     if z[0] != True:
         axis_list[4] -= 1
     if z[2] != True:
@@ -433,10 +519,8 @@ def gamepad_thread():
                 binding_sticks([0, 0], [0, axisRUV[0]], [0, 0, 0, 0])
 
 
-my_thread = threading.Thread(target=gamepad_thread )
+my_thread = threading.Thread(target=gamepad_thread)
 my_thread.start()
-
-
 
 ui.show()
 app.exec()
