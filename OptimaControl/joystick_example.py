@@ -54,8 +54,15 @@ while run:
         axisXYZ = [info.dwXpos-startinfo.dwXpos, info.dwYpos-startinfo.dwYpos, info.dwZpos-startinfo.dwZpos]
         axisRUV = [info.dwRpos-startinfo.dwRpos, info.dwUpos-startinfo.dwUpos, info.dwVpos-startinfo.dwVpos]
         if info.dwButtons:
-            # print("buttons: ", btns)
+            print("buttons: ", btns)
             binding_sticks([0,0], [0,0], [btns[0], btns[1], btns[2], btns[3]])
+
+            if btns[5]:
+                print('LASER ON')
+            if btns[4]:
+                print('LASER OFF')
+
+
         if any([abs(v) > 10 for v in axisXYZ]):
             # print("axis:", axisXYZ)
             binding_sticks([axisXYZ[0], axisXYZ[1]], [axisXYZ[2], 0], [0,0,0,0])
