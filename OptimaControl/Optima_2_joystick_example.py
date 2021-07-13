@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt5.QtCore import QIODevice
+from time import sleep
 
 # from PyQt5 import QRadioButton
 
@@ -8,7 +9,7 @@ from PyQt5.QtCore import QIODevice
 
 axis_list = [0, 0, 0, 0, 0, 0, 0]
 
-
+port_busi = 0
 
 app = QtWidgets.QApplication([])
 app.setStyle('Fusion')
@@ -78,14 +79,25 @@ def serialSend(data):
         txs += ','
     txs = txs[:-1]
     txs += ';'
+
+
+    global port_busi
+    while port_busi:
+        sleep(0.01)
+
+    port_busi = 1
     serial.write(txs.encode())
-    print(txs)
+    sleep(0.1)
+    port_busi = 0
+
+    # print(txs)
 
 
 def ledControll(val):
+
     if val == 2:
         val = 1
-    print('ledControl', val)
+    # print('ledControl', val)
     # serialSend(['0', str(val)])
     s = [0, val, 0]
     txs = ''
@@ -95,7 +107,14 @@ def ledControll(val):
     txs = txs[:-1]
     txs += ';'
 
+    global port_busi
+    while port_busi:
+        sleep(0.01)
+
+    port_busi = 1
     serial.write(txs.encode())
+    sleep(0.1)
+    port_busi = 0
 
 
 def DFPlayer():
@@ -436,7 +455,7 @@ def axisSetFunc():
         if int(axis_list[1]) < -60:
             axis_list[1] = -60
             ui.lineEdit_2.selectAll()
-            ui.lineEdit_2.insert('0')
+            ui.lineEdit_2.insert('-60')
         ui.servoSlider2.setSliderPosition(int(axis_list[1]))
 
         if int(axis_list[2]) > 120:
@@ -494,7 +513,7 @@ def axisSetFunc():
         pass
 
 
-def binding_sticks(x, y, z, table):
+def binding_sticks(x, y, z, table, laser):
 
     global axis_list
 
@@ -518,6 +537,12 @@ def binding_sticks(x, y, z, table):
         axis_list[6] -= 5
     if table[1]:
         axis_list[6] += 5
+    if laser[0]:
+        ledControll(1)
+        # ui.checkBox_LED_13.setChecked(True)
+    if laser[1]:
+        ledControll(0)
+        # ui.checkBox_LED_13.setChecked(False)
 
     # print(axis_list)
     axisSetFunc()
@@ -541,7 +566,6 @@ def gamepad_thread():
     ret, caps, startinfo = False, None, None
     for id in range(num):
         ret, caps = joyGetDevCaps(id)
-        ret, caps = joyGetDevCaps(id)
         if ret:
             print("gamepad detected: " + caps.szPname)
             ret, startinfo = joyGetPosEx(id)
@@ -562,35 +586,37 @@ def gamepad_thread():
             axisRUV = [info.dwRpos - startinfo.dwRpos, info.dwUpos - startinfo.dwUpos, info.dwVpos - startinfo.dwVpos]
             if info.dwButtons:
                 # print("buttons: ", btns)
-                binding_sticks([0, 0], [0, 0], [btns[0], btns[1], btns[2], btns[3]], table=[btns[6], btns[7]])
-                if btns[5]:
-                    print('LASER ON')
-                    laser_on()
-                if btns[4]:
-                    print('LASER OFF')
-                    laser_off()
-
-                if btns[6]:
-                    print('rotate С left')
-                    pass
-                if btns[7]:
-                    print('rotate С right')
-                    pass
+                binding_sticks([0, 0], [0, 0], [btns[0], btns[1], btns[2], btns[3]],
+                               table=[btns[6], btns[7]], laser=[btns[5],btns[4]])
+                # if btns[5]:
+                #     # print('LASER ON')
+                #     laser_on()
+                # if btns[4]:
+                #     # print('LASER OFF')
+                #     laser_off()
+                #
+                # if btns[6]:
+                #     # print('rotate С left')
+                #     pass
+                # if btns[7]:
+                #     # print('rotate С right')
+                #     pass
 
             if any([abs(v) > 10 for v in axisXYZ]):
                 # print("axis:", axisXYZ)
-                binding_sticks([axisXYZ[0], axisXYZ[1]], [axisXYZ[2], 0], [0, 0, 0, 0], table=[0, 0])
+                binding_sticks([axisXYZ[0], axisXYZ[1]], [axisXYZ[2], 0], [0, 0, 0, 0], table=[0, 0], laser=[0,0])
             if any([abs(v) > 10 for v in axisRUV]):
                 # print("roation axis:", axisRUV)
-                binding_sticks([0, 0], [0, axisRUV[0]], [0, 0, 0, 0], table=[0, 0])
+                binding_sticks([0, 0], [0, axisRUV[0]], [0, 0, 0, 0], table=[0, 0], laser=[0,0])
 
 
 my_thread = threading.Thread(target=gamepad_thread )
 my_thread.start()
 
 
-
 ui.show()
 app.exec()
 
 serial.close()
+
+app.exit()
