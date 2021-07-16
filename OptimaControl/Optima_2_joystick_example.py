@@ -2,6 +2,8 @@ from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt5.QtCore import QIODevice
 from time import sleep
+import sys
+from PyQt5.QtWidgets import QMessageBox
 
 # from PyQt5 import QRadioButton
 
@@ -29,6 +31,10 @@ print(portList)
 print(portListDescription)
 # ui.comboBox.addItems(portListDescription)
 ui.comboBox.addItems(portList)
+
+reply = QMessageBox.question(ui, 'Внимание!',
+                             'Для использования геймпада подключите его к компьютеру, и нажмите на нем кнопку "Mode"',
+                             QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
 
 
 def onRead():
@@ -81,14 +87,14 @@ def serialSend(data):
     txs += ';'
 
 
-    global port_busi
-    while port_busi:
-        sleep(0.01)
+    # global port_busi
+    # while port_busi:
+    #     sleep(0.01)
 
-    port_busi = 1
+    # port_busi = 1
     serial.write(txs.encode())
-    sleep(0.1)
-    port_busi = 0
+    # sleep(0.1)
+    # port_busi = 0
 
     # print(txs)
 
@@ -107,14 +113,14 @@ def ledControll(val):
     txs = txs[:-1]
     txs += ';'
 
-    global port_busi
-    while port_busi:
-        sleep(0.01)
+    # global port_busi
+    # while port_busi:
+    #     sleep(0.01)
 
-    port_busi = 1
+    # port_busi = 1
     serial.write(txs.encode())
-    sleep(0.1)
-    port_busi = 0
+    # sleep(0.1)
+    # port_busi = 0
 
 
 def DFPlayer():
@@ -615,8 +621,8 @@ my_thread.start()
 
 
 ui.show()
-app.exec()
+sys.exit(app.exec_())
 
-serial.close()
+# serial.close()
 
-app.exit()
+# app.exit()
