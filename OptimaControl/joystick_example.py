@@ -65,9 +65,9 @@ while run:
 
         if any([abs(v) > 10 for v in axisXYZ]):
             print("axis:", axisXYZ)
-            binding_sticks([axisXYZ[0], axisXYZ[1]], [axisXYZ[2], 0], [0,0,0,0])
+            binding_sticks([axisXYZ[0], axisXYZ[1]], [0, 0], [0,0,0,0])
         if any([abs(v) > 10 for v in axisRUV]):
             print("roation axis:", axisRUV)
-            binding_sticks([0,0], [0, axisRUV[0]], [0,0,0,0])
+            binding_sticks([0,0], [axisRUV[1], axisRUV[0]], [0,0,0,0])
 
 print("end")

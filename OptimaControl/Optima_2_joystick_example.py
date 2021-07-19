@@ -33,7 +33,7 @@ print(portListDescription)
 ui.comboBox.addItems(portList)
 
 reply = QMessageBox.question(ui, 'Внимание!',
-                             'Для использования геймпада подключите его к компьютеру, и нажмите на нем кнопку "Mode"',
+                             'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
 
 
@@ -532,17 +532,15 @@ def binding_sticks(x, y, z, table, laser):
     if y[1] != 0:
         axis_list[2] -= round(y[1] / 32768)
     if z[0] != True:
-        axis_list[4] -= 1
-    if z[2] != True:
         axis_list[4] += 1
+    if z[2] != True:
+        axis_list[4] -= 1
     if z[1] != True:
-        axis_list[5] -= 5
-    if z[3] != True:
         axis_list[5] += 5
+    if z[3] != True:
+        axis_list[5] -= 5
     if table[0]:
-        axis_list[6] -= 5
-    if table[1]:
-        axis_list[6] += 5
+        axis_list[6] -= round(table[0] / 32768) * 5
     if laser[0]:
         ledControll(1)
         # ui.checkBox_LED_13.setChecked(True)
@@ -592,28 +590,15 @@ def gamepad_thread():
             axisRUV = [info.dwRpos - startinfo.dwRpos, info.dwUpos - startinfo.dwUpos, info.dwVpos - startinfo.dwVpos]
             if info.dwButtons:
                 # print("buttons: ", btns)
-                binding_sticks([0, 0], [0, 0], [btns[0], btns[1], btns[2], btns[3]],
+                binding_sticks(x=[0, 0], y=[0, 0], z=[btns[0], btns[2], btns[1], btns[3]],
                                table=[btns[6], btns[7]], laser=[btns[5],btns[4]])
-                # if btns[5]:
-                #     # print('LASER ON')
-                #     laser_on()
-                # if btns[4]:
-                #     # print('LASER OFF')
-                #     laser_off()
-                #
-                # if btns[6]:
-                #     # print('rotate С left')
-                #     pass
-                # if btns[7]:
-                #     # print('rotate С right')
-                #     pass
 
             if any([abs(v) > 10 for v in axisXYZ]):
                 # print("axis:", axisXYZ)
-                binding_sticks([axisXYZ[0], axisXYZ[1]], [axisXYZ[2], 0], [0, 0, 0, 0], table=[0, 0], laser=[0,0])
+                binding_sticks(x=[axisXYZ[0], axisXYZ[1]], y=[0, 0], z=[0, 0, 0, 0], table=[axisXYZ[2], 0], laser=[0,0])
             if any([abs(v) > 10 for v in axisRUV]):
                 # print("roation axis:", axisRUV)
-                binding_sticks([0, 0], [0, axisRUV[0]], [0, 0, 0, 0], table=[0, 0], laser=[0,0])
+                binding_sticks(x=[0, 0], y=[axisRUV[1], axisRUV[0]], z=[0, 0, 0, 0], table=[0, 0], laser=[0,0])
 
 
 my_thread = threading.Thread(target=gamepad_thread )
@@ -622,6 +607,7 @@ my_thread.start()
 
 ui.show()
 sys.exit(app.exec_())
+
 
 # serial.close()
 
