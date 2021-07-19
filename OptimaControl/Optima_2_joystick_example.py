@@ -13,7 +13,7 @@ axis_list = [0, 0, 0, 0, 0, 0, 0]
 
 port_busi = 0
 
-app = QtWidgets.QApplication([])
+app = QtWidgets.QApplication(sys.argv)
 app.setStyle('Fusion')
 ui = uic.loadUi('src/ui_desig_v0.6.ui')
 ui.setWindowTitle("Optima-2 Controller")
