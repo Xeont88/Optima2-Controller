@@ -9,13 +9,13 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 
-axis_list = [0, 0, 0, 0, 0, 0, 0]
+axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
 
 port_busi = 0
 
 app = QtWidgets.QApplication(sys.argv)
 app.setStyle('Fusion')
-ui = uic.loadUi('src/ui_desig_v0.6.ui')
+ui = uic.loadUi('src/ui_desig_v0.7.ui')
 ui.setWindowTitle("Optima-2 Controller")
 ui.setWindowIcon(QtGui.QIcon('src/zarnitza64g.ico'))
 
@@ -154,6 +154,8 @@ def servoControl():
     ui.lineEdit_6.insert(str(ui.servoSlider6.value()))
     ui.lineEdit_7.selectAll()
     ui.lineEdit_7.insert(str(ui.servoSlider7.value()))
+    ui.lineEdit_8.selectAll()
+    ui.lineEdit_8.insert(str(ui.servoSlider8.value()))
 
     setAxisListTo()
 
@@ -163,7 +165,8 @@ def servoControl():
                 ui.servoSlider4.value(),
                 ui.servoSlider5.value(),
                 ui.servoSlider6.value(),
-                ui.servoSlider7.value(), 0])
+                ui.servoSlider7.value(),
+                ui.servoSlider8.value(), 0])
 
 
 '''
@@ -223,21 +226,29 @@ def servoSetFunc():
             ui.lineEdit_5.insert('-90')
         ui.servoSlider5.setSliderPosition(int(ui.lineEdit_5.text()))
 
-        if int(ui.lineEdit_6.text()) > 100:
+        if int(ui.lineEdit_6.text()) > 90:
             ui.lineEdit_6.selectAll()
-            ui.lineEdit_6.insert('100')
-        if int(ui.lineEdit_6.text()) < 0:
+            ui.lineEdit_6.insert('90')
+        if int(ui.lineEdit_6.text()) < -90:
             ui.lineEdit_6.selectAll()
-            ui.lineEdit_6.insert('0')
+            ui.lineEdit_6.insert('-90')
         ui.servoSlider6.setSliderPosition(int(ui.lineEdit_6.text()))
 
-        if int(ui.lineEdit_7.text()) > 360:
+        if int(ui.lineEdit_7.text()) > 100:
             ui.lineEdit_7.selectAll()
-            ui.lineEdit_7.insert('360')
-        if int(ui.lineEdit_7.text()) < -360:
+            ui.lineEdit_7.insert('100')
+        if int(ui.lineEdit_7.text()) < 0:
             ui.lineEdit_7.selectAll()
-            ui.lineEdit_7.insert('-360')
+            ui.lineEdit_7.insert('0')
         ui.servoSlider7.setSliderPosition(int(ui.lineEdit_7.text()))
+
+        if int(ui.lineEdit_8.text()) > 360:
+            ui.lineEdit_8.selectAll()
+            ui.lineEdit_8.insert('360')
+        if int(ui.lineEdit_8.text()) < -360:
+            ui.lineEdit_8.selectAll()
+            ui.lineEdit_8.insert('-360')
+        ui.servoSlider8.setSliderPosition(int(ui.lineEdit_8.text()))
 
         setAxisListTo()
     except:
@@ -253,6 +264,7 @@ def setAxisListTo():
     axis_list[4] = int(ui.lineEdit_5.text())
     axis_list[5] = int(ui.lineEdit_6.text())
     axis_list[6] = int(ui.lineEdit_7.text())
+    axis_list[7] = int(ui.lineEdit_8.text())
 
 
 # Serial connections
@@ -273,6 +285,7 @@ ui.servoSlider4.valueChanged.connect(servoControl)
 ui.servoSlider5.valueChanged.connect(servoControl)
 ui.servoSlider6.valueChanged.connect(servoControl)
 ui.servoSlider7.valueChanged.connect(servoControl)
+ui.servoSlider8.valueChanged.connect(servoControl)
 
 # ui.checkBox_servo1.stateChanged.connect(servoCheckBoxControl)
 # ui.checkBox_servo2.stateChanged.connect(servoCheckBoxControl)
@@ -294,6 +307,8 @@ ui.pushButton_6.clicked.connect(servoSetFunc)
 ui.lineEdit_6.returnPressed.connect(servoSetFunc)
 ui.pushButton_7.clicked.connect(servoSetFunc)
 ui.lineEdit_7.returnPressed.connect(servoSetFunc)
+ui.pushButton_8.clicked.connect(servoSetFunc)
+ui.lineEdit_8.returnPressed.connect(servoSetFunc)
 
 # RGB control
 ui.slider_r.valueChanged.connect(RGB_control)
@@ -494,32 +509,42 @@ def axisSetFunc():
             ui.lineEdit_5.insert('-90')
         ui.servoSlider5.setSliderPosition(int(axis_list[4]))
 
-        if int(axis_list[5]) > 100:
-            axis_list[5] = 100
+        if int(axis_list[5]) > 90:
+            axis_list[5] = 90
             ui.lineEdit_6.selectAll()
-            ui.lineEdit_6.insert('100')
-        if int(axis_list[5]) < 0:
-            axis_list[5] = 0
+            ui.lineEdit_6.insert('90')
+        if int(axis_list[5]) < -90:
+            axis_list[5] = -90
             ui.lineEdit_6.selectAll()
-            ui.lineEdit_6.insert('0')
+            ui.lineEdit_6.insert('-90')
         ui.servoSlider6.setSliderPosition(int(axis_list[5]))
 
-        if int(axis_list[6]) > 360:
-            axis_list[6] = 360
+        if int(axis_list[6]) > 100:
+            axis_list[6] = 100
             ui.lineEdit_7.selectAll()
-            ui.lineEdit_7.insert('360')
-        if int(axis_list[6]) < -360:
-            axis_list[6] = -360
+            ui.lineEdit_7.insert('100')
+        if int(axis_list[6]) < 0:
+            axis_list[6] = 0
             ui.lineEdit_7.selectAll()
-            ui.lineEdit_7.insert('-360')
+            ui.lineEdit_7.insert('0')
         ui.servoSlider7.setSliderPosition(int(axis_list[6]))
+
+        if int(axis_list[7]) > 360:
+            axis_list[7] = 360
+            ui.lineEdit_8.selectAll()
+            ui.lineEdit_8.insert('360')
+        if int(axis_list[7]) < -360:
+            axis_list[7] = -360
+            ui.lineEdit_8.selectAll()
+            ui.lineEdit_8.insert('-360')
+        ui.servoSlider8.setSliderPosition(int(axis_list[7]))
 
     except:
         # print("don't do that!")
         pass
 
 
-def binding_sticks(x, y, z, table, laser):
+def binding_sticks(x, y, z, table, axis_6):
 
     global axis_list
 
@@ -536,16 +561,16 @@ def binding_sticks(x, y, z, table, laser):
     if z[2] != True:
         axis_list[4] -= 1
     if z[1] != True:
-        axis_list[5] += 5
+        axis_list[5] += 1
     if z[3] != True:
-        axis_list[5] -= 5
+        axis_list[5] -= 1
     if table[0]:
-        axis_list[6] -= round(table[0] / 32768) * 5
-    if laser[0]:
-        ledControll(1)
+        axis_list[7] -= round(table[0] / 32768) * 5
+    if axis_6[0]:
+        axis_list[6] += 5
         # ui.checkBox_LED_13.setChecked(True)
-    if laser[1]:
-        ledControll(0)
+    if axis_6[1]:
+        axis_list[6] -= 5
         # ui.checkBox_LED_13.setChecked(False)
 
     # print(axis_list)
