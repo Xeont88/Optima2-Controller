@@ -617,19 +617,29 @@ def gamepad_thread():
             if info.dwButtons:
                 # print("buttons: ", btns)
                 binding_sticks(x=[0, 0], y=[0, 0], z=[btns[0], btns[2], btns[1], btns[3]],
-                               table=[btns[6], btns[7]], laser=[btns[5],btns[4]])
+                               table=[btns[6], btns[7]], axis_6=[btns[5],btns[4]])
 
             if any([abs(v) > 10 for v in axisXYZ]):
                 # print("axis:", axisXYZ)
-                binding_sticks(x=[axisXYZ[0], axisXYZ[1]], y=[0, 0], z=[0, 0, 0, 0], table=[axisXYZ[2], 0], laser=[0,0])
+                binding_sticks(x=[axisXYZ[0], axisXYZ[1]], y=[0, 0], z=[0, 0, 0, 0], table=[axisXYZ[2], 0], axis_6=[0,0])
             if any([abs(v) > 10 for v in axisRUV]):
                 # print("roation axis:", axisRUV)
-                binding_sticks(x=[0, 0], y=[axisRUV[1], axisRUV[0]], z=[0, 0, 0, 0], table=[0, 0], laser=[0,0])
+                binding_sticks(x=[0, 0], y=[axisRUV[1], axisRUV[0]], z=[0, 0, 0, 0], table=[0, 0], axis_6=[0,0])
 
 
 my_thread = threading.Thread(target=gamepad_thread )
 my_thread.start()
 
+def close_event(event):
+    reply = QMessageBox.question(self, 'Quit?',
+                                 'Вы действительно хотите выйти?',
+                                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+    if reply == QMessageBox.Yes:
+        event.accept()
+        print('Quit')
+    else:
+        print('stay')
+        event.ignore()
 
 ui.show()
 sys.exit(app.exec_())
