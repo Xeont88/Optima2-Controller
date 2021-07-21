@@ -19,6 +19,7 @@ ui = uic.loadUi('src/ui_desig_v0.7.ui')
 ui.setWindowTitle("Optima-2 Controller")
 ui.setWindowIcon(QtGui.QIcon('src/zarnitza64g.ico'))
 
+
 serial = QSerialPort()
 serial.setBaudRate(115200)
 portList = []
@@ -138,7 +139,7 @@ def RGB_control():
                 int(ui.slider_g.value() * ui.light_slider.value() / 100),
                 int(ui.slider_b.value() * ui.light_slider.value() / 100), 5])
 
-
+    
 def servoControl():
     ui.lineEdit.selectAll()
     ui.lineEdit.insert(str(ui.servoSlider1.value()))
