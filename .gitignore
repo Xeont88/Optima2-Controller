@@ -5,3 +5,6 @@ OptimaControl/build/
 *.spec
 *.exe
 *.zip
+OptimaController_v0.7/.idea/
+OptimaController_v0.7/__pycache__/
+
