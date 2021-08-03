@@ -7,7 +7,8 @@
 
 SoftwareSerial mySerial(3, 4); // RX, TX
 
-#define NUM_LEDS 4+8+20
+//#define NUM_LEDS 4+8+20
+#define NUM_LEDS (4+8)*3
 #define DATA_PIN 12
 CRGB leds[NUM_LEDS];
 
@@ -29,7 +30,8 @@ void setup() {
   //  stepper4.runSpeed();
   //  stepper5.runSpeed();
 
-  FastLED.addLeds<WS2812, DATA_PIN, BRG>(leds, NUM_LEDS);
+//  FastLED.addLeds<WS2812, DATA_PIN, BRG>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
 
   Serial.flush();
   stepper1.setMaxSpeed(1500);
@@ -55,7 +57,7 @@ void setup() {
   stepper1.setCurrentPosition(0 * 88);
   stepper2.setCurrentPosition(0 * 45);
   stepper3.setCurrentPosition(0 * 98);
-  stepper4.setCurrentPosition(0 * 46);
+  stepper4.setCurrentPosition(0 * 9);   // 46
   stepper5.setCurrentPosition(0 * 20);
   stepper7.setCurrentPosition(0 * 8.9);
 
@@ -94,15 +96,15 @@ void loop() {
         //        int position5 = ints[5];
         //        int position7 = ints[7];
         if (stepper1.currentPosition() != ints[1])
-          stepper1.moveTo(ints[1] * 88);
+          stepper1.moveTo(ints[1] * 88);          // 88
         if (stepper2.currentPosition() != ints[2])
-          stepper2.moveTo(ints[2] * 45);
+          stepper2.moveTo(ints[2] * 45);          // 45
         if (stepper3.currentPosition() != ints[3])
-          stepper3.moveTo(ints[3] * 98);
+          stepper3.moveTo(ints[3] * 98);          // 98
         if (stepper4.currentPosition() != ints[4])
-          stepper4.moveTo(ints[4] * 46);
+          stepper4.moveTo(ints[4] * 9);           // 46
         if (stepper5.currentPosition() != ints[5])
-          stepper5.moveTo(ints[5] * 20);
+          stepper5.moveTo(ints[5] * 20);          // 20
 
 //        if ();
         servo_gripper.setTargetDeg(ints[6]);               
