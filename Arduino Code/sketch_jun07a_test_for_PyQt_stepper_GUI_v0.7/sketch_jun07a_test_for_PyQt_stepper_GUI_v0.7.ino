@@ -23,6 +23,8 @@ AccelStepper stepper4(1, 26, 28); // 5
 AccelStepper stepper5(1, 34, 36); // 6
 AccelStepper stepper7(1, 40, 42); //  карусель
 
+#define SERVO_AXIS_7  9
+ServoSmooth servo_axis_7;
 #define SERVO_GRIPPER  11
 ServoSmooth servo_gripper;
 
@@ -41,6 +43,11 @@ void setup() {
   stepper5.setMaxSpeed(800);
   stepper7.setMaxSpeed(1000);
 
+  servo_axis_7.attach(SERVO_AXIS_7, 600, 2400);  // 600 и 2400 - длины импульсов, при которых
+  servo_axis_7.setSpeed(180);   // ограничить скорость
+  servo_axis_7.setAccel(0.8);   // установить ускорение (разгон и торможение)
+  servo_axis_7.setTargetDeg(90);
+  
   servo_gripper.attach(SERVO_GRIPPER, 600, 2400);  // 600 и 2400 - длины импульсов, при которых
   servo_gripper.setSpeed(180);   // ограничить скорость
   servo_gripper.setAccel(0.8);   // установить ускорение (разгон и торможение)
@@ -107,10 +114,12 @@ void loop() {
           stepper5.moveTo(ints[5] * 20);          // 20
 
 //        if ();
-        servo_gripper.setTargetDeg(ints[6]);               
+        servo_axis_7.setTargetDeg(ints[6]+90);               
+        
+        servo_gripper.setTargetDeg(ints[7]);               
 
-        if (stepper7.currentPosition() != ints[7])
-          stepper7.moveTo(ints[7] * 8.9);       //  8.9 - коэфициент - "шаги в градусы"
+        if (stepper7.currentPosition() != ints[8])
+          stepper7.moveTo(ints[8] * 8.9);       //  8.9 - коэфициент - "шаги в градусы"
         break;
         
       // управление адресной LED лентой
@@ -139,6 +148,7 @@ void loop() {
   stepper3.run();
   stepper4.run();
   stepper5.run();
+  servo_axis_7.tick();
   servo_gripper.tick();   // здесь происходит движение серво по встроенному таймеру!
   stepper7.run();
 }
