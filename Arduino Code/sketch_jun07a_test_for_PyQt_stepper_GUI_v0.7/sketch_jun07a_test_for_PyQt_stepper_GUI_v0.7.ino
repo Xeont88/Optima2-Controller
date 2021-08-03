@@ -20,7 +20,7 @@ AccelStepper stepper1(1, 35, 37); // 1
 AccelStepper stepper2(1, 46, 48); // 2, 3
 AccelStepper stepper3(1, 23, 25); // 4
 AccelStepper stepper4(1, 26, 28); // 5
-AccelStepper stepper5(1, 36, 34); // 6
+AccelStepper stepper5(1, 34, 36); // 6
 AccelStepper stepper7(1, 40, 42); //  карусель
 
 #define SERVO_GRIPPER  11
