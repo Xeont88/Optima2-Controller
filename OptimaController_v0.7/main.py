@@ -6,6 +6,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt5.QtCore import QIODevice
 from time import sleep
+from gamepad_class import *
 
 # Работа геймпада. Потоки, функции и мэйнлуп для работы геймпада
 import threading
@@ -15,25 +16,24 @@ import time
 import ctypes
 
 
-
-class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
+class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
     axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
     portList = []
     portListDescription = ['Выберите устройство']
 
-
     def __init__(self, ):
         super().__init__()
+        self.gamepad_init()
         self.setupUi(self)
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-        self.serialInit()
+        self.serial_init()
         # Serial connections
-        self.serial.readyRead.connect(self.onRead)
-        self.refreshCOMbutton.clicked.connect(self.refreshCOM)
-        self.connectButton.clicked.connect(self.onOpen)
-        self.ejectButton.clicked.connect(self.onClose)
+        self.serial.readyRead.connect(self.on_read)
+        self.refreshCOMbutton.clicked.connect(self.refresh_COM)
+        self.connectButton.clicked.connect(self.on_open)
+        self.ejectButton.clicked.connect(self.on_close)
 
         # RGB control
         self.slider_r.valueChanged.connect(self.RGB_control)
@@ -42,29 +42,32 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         self.light_slider.valueChanged.connect(self.RGB_control)
 
         # Servos control
-        self.servoSlider1.valueChanged.connect(self.servoControl)
-        self.servoSlider2.valueChanged.connect(self.servoControl)
-        self.servoSlider3.valueChanged.connect(self.servoControl)
-        self.servoSlider4.valueChanged.connect(self.servoControl)
-        self.servoSlider5.valueChanged.connect(self.servoControl)
-        self.servoSlider6.valueChanged.connect(self.servoControl)
-        self.servoSlider7.valueChanged.connect(self.servoControl)
-        self.servoSlider8.valueChanged.connect(self.servoControl)
-        self.servoControl()
+        self.servoSlider1.valueChanged.connect(self.servo_control)
+        self.servoSlider2.valueChanged.connect(self.servo_control)
+        self.servoSlider3.valueChanged.connect(self.servo_control)
+        self.servoSlider4.valueChanged.connect(self.servo_control)
+        self.servoSlider5.valueChanged.connect(self.servo_control)
+        self.servoSlider6.valueChanged.connect(self.servo_control)
+        self.servoSlider7.valueChanged.connect(self.servo_control)
+        self.servoSlider8.valueChanged.connect(self.servo_control)
+        self.servo_control()
 
+        self.my_thread = threading.Thread(target=self.gamepad_thread)
+        self.my_thread.start()
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Quit?',
                                      'Вы действительно хотите выйти?',
-                                     QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel, QMessageBox.Yes)
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
+            self.run = False
             event.accept()
             print('Quit')
         else:
             print('stay')
             event.ignore()
 
-    def serialInit(self):
+    def serial_init(self):
         # open the serial port
         self.serial = QSerialPort(self)
         self.serial.setBaudRate(115200)
@@ -77,13 +80,13 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         print(self.portListDescription)
         self.comboBox.addItems(self.portList)
 
-    def onRead(self):
+    def on_read(self):
         rx = self.serial.readLine()
         rxs = str(rx, 'utf-8').strip()
         data = rxs.split(' ')
         print(data)
 
-    def onOpen(self):
+    def on_open(self):
         self.serial.setPortName(self.comboBox.currentText())
         answer = self.serial.open(QIODevice.ReadWrite)
         print('connected to', self.comboBox.currentText())
@@ -91,11 +94,11 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         if answer:
             self.connectLabel.setText('Подключено')
 
-    def onClose(self):
+    def on_close(self):
         self.serial.close()
         self.connectLabel.setText('Нет подключения')
 
-    def refreshCOM(self):
+    def refresh_COM(self):
         ports = QSerialPortInfo().availablePorts()
         # ports.clear()
         for port in ports:
@@ -107,7 +110,7 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         self.comboBox.clear()
         self.comboBox.addItems(self.portList)
 
-    def serialSend(self, data):
+    def serial_send(self, data):
         txs = ''
         for val in data:
             txs += str(val)
@@ -116,7 +119,7 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         txs += ';'
         self.serial.write(txs.encode())
 
-    def servoControl(self):
+    def servo_control(self):
         self.lineEdit.selectAll()
         self.lineEdit.insert(str(self.servoSlider1.value()))
         self.lineEdit_2.selectAll()
@@ -134,19 +137,19 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
         self.lineEdit_8.selectAll()
         self.lineEdit_8.insert(str(self.servoSlider8.value()))
 
-        self.setAxisListTo()
+        self.set_axis_list_to()
 
-        self.serialSend([1, self.servoSlider1.value(),
-                         self.servoSlider2.value(),
-                         self.servoSlider3.value(),
-                         self.servoSlider4.value(),
-                         self.servoSlider5.value(),
-                         self.servoSlider6.value(),
-                         self.servoSlider7.value(),
-                         self.servoSlider8.value(),
-                         0])
+        self.serial_send([1, self.servoSlider1.value(),
+                          self.servoSlider2.value(),
+                          self.servoSlider3.value(),
+                          self.servoSlider4.value(),
+                          self.servoSlider5.value(),
+                          self.servoSlider6.value(),
+                          self.servoSlider7.value(),
+                          self.servoSlider8.value(),
+                          0])
 
-    def ledControll(self, val):
+    def led_controll(self, val):
         if val == 2:
             val = 1
         s = [0, val, 0]
@@ -168,11 +171,11 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
     def RGB_control(self):
         # r = int(ui.slider_r.value()*ui.light_slider.value()/100)
         # print('r =', ui.light_slider.value())
-        self.serialSend([2, int(self.slider_r.value() * self.light_slider.value() / 100),
-                    int(self.slider_g.value() * self.light_slider.value() / 100),
-                    int(self.slider_b.value() * self.light_slider.value() / 100), 5])
+        self.serial_send([2, int(self.slider_r.value() * self.light_slider.value() / 100),
+                          int(self.slider_g.value() * self.light_slider.value() / 100),
+                          int(self.slider_b.value() * self.light_slider.value() / 100), 5])
 
-    def servoSetFunc(self):
+    def servo_set_func(self):
         # TODO: поправить конечные положения шаговиков. -90, 90 и тд.
         try:
             if int(self.lineEdit.text()) > 120:
@@ -239,11 +242,11 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
                 self.lineEdit_8.insert('-360')
             self.servoSlider8.setSliderPosition(int(self.lineEdit_8.text()))
 
-            self.setAxisListTo()
+            self.set_axis_list_to()
         except:
             print("don't do that!")
 
-    def setAxisListTo(self):
+    def set_axis_list_to(self):
         self.axis_list[0] = int(self.lineEdit.text())
         self.axis_list[1] = int(self.lineEdit_2.text())
         self.axis_list[2] = int(self.lineEdit_3.text())
@@ -263,6 +266,169 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow):
             for file_name in os.listdir(directory):  # для каждого файла в директории
                 self.listWidget.addItem(file_name)  # добавить файл в listWidget
 
+    def laser_on(self):
+        self.led_controll(1)
+        self.checkBox_LED_13.setChecked(True)
+
+    def laser_off(self):
+        self.led_controll(0)
+        self.checkBox_LED_13.setChecked(False)
+
+    # def servoSetFunc(servo):
+    def axisSetFunc(self):
+
+        try:
+            if int(self.axis_list[0]) > 120:
+                self.axis_list[0] = 120
+                self.lineEdit.selectAll()
+                self.lineEdit.insert('120')
+            if int(self.axis_list[0]) < -120:
+                self.axis_list[0] = -120
+                self.lineEdit.selectAll()
+                self.lineEdit.insert('-120')
+            self.servoSlider1.setSliderPosition(int(self.axis_list[0]))
+
+            if int(self.axis_list[1]) > 120:
+                self.axis_list[1] = 120
+                self.lineEdit_2.selectAll()
+                self.lineEdit_2.insert('120')
+            if int(self.axis_list[1]) < -60:
+                self.axis_list[1] = -60
+                self.lineEdit_2.selectAll()
+                self.lineEdit_2.insert('-60')
+            self.servoSlider2.setSliderPosition(int(self.axis_list[1]))
+
+            if int(self.axis_list[2]) > 120:
+                self.axis_list[2] = 120
+                self.lineEdit_3.selectAll()
+                self.lineEdit_3.insert('120')
+            if int(self.axis_list[2]) < -60:
+                self.axis_list[2] = -60
+                self.lineEdit_3.selectAll()
+                self.lineEdit_3.insert('-60')
+            self.servoSlider3.setSliderPosition(int(self.axis_list[2]))
+
+            if int(self.axis_list[3]) > 90:
+                self.axis_list[3] = 90
+                self.lineEdit_4.selectAll()
+                self.lineEdit_4.insert('90')
+            if int(self.axis_list[3]) < -90:
+                self.axis_list[3] = -90
+                self.lineEdit_4.selectAll()
+                self.lineEdit_4.insert('-90')
+            self.servoSlider4.setSliderPosition(int(self.axis_list[3]))
+
+            if int(self.axis_list[4]) > 90:
+                self.axis_list[4] = 90
+                self.lineEdit_5.selectAll()
+                self.lineEdit_5.insert('90')
+            if int(self.axis_list[4]) < -90:
+                self.axis_list[4] = -90
+                self.lineEdit_5.selectAll()
+                self.lineEdit_5.insert('-90')
+            self.servoSlider5.setSliderPosition(int(self.axis_list[4]))
+
+            if int(self.axis_list[5]) > 90:
+                self.axis_list[5] = 90
+                self.lineEdit_6.selectAll()
+                self.lineEdit_6.insert('90')
+            if int(self.axis_list[5]) < -90:
+                self.axis_list[5] = -90
+                self.lineEdit_6.selectAll()
+                self.lineEdit_6.insert('-90')
+            self.servoSlider6.setSliderPosition(int(self.axis_list[5]))
+
+            if int(self.axis_list[6]) > 100:
+                self.axis_list[6] = 100
+                self.lineEdit_7.selectAll()
+                self.lineEdit_7.insert('100')
+            if int(self.axis_list[6]) < 0:
+                self.axis_list[6] = 0
+                self.lineEdit_7.selectAll()
+                self.lineEdit_7.insert('0')
+            self.servoSlider7.setSliderPosition(int(self.axis_list[6]))
+
+            if int(self.axis_list[7]) > 360:
+                self.axis_list[7] = 360
+                self.lineEdit_8.selectAll()
+                self.lineEdit_8.insert('360')
+            if int(self.axis_list[7]) < -360:
+                self.axis_list[7] = -360
+                self.lineEdit_8.selectAll()
+                self.lineEdit_8.insert('-360')
+            self.servoSlider8.setSliderPosition(int(self.axis_list[7]))
+
+        except:
+            print("don't do that!")
+            pass
+
+    def binding_sticks(self, x, y, z, table, axis_6):
+
+        if x[0] != 0:
+            self.axis_list[0] += round(x[0] / 32768)
+        if x[1] != 0:
+            self.axis_list[1] -= round(x[1] / 32768)
+        if y[0] != 0:
+            self.axis_list[3] += round(y[0] / 32768)
+        if y[1] != 0:
+            self.axis_list[2] -= round(y[1] / 32768)
+        if z[0] != True:
+            self.axis_list[4] += 1
+        if z[2] != True:
+            self.axis_list[4] -= 1
+        if z[1] != True:
+            self.axis_list[5] += 1
+        if z[3] != True:
+            self.axis_list[5] -= 1
+        if table[0]:
+            self.axis_list[7] -= round(table[0] / 32768) * 5
+        if axis_6[0]:
+            self.axis_list[6] += 5
+            # ui.checkBox_LED_13.setChecked(True)
+        if axis_6[1]:
+            self.axis_list[6] -= 5
+            # ui.checkBox_LED_13.setChecked(False)
+
+        # print(axis_list)
+        self.axisSetFunc()
+
+    def gamepad_thread(self):
+        print("start of gamepad script")
+
+        # num = joystickapi.joyGetNumDevs()
+        num = self.joyGetNumDevs()
+        ret, caps, startinfo = False, None, None
+        for id in range(num):
+            ret, caps = self.joyGetDevCaps(id)
+            if ret:
+                print("gamepad detected: " + caps.szPname)
+                ret, startinfo = self.joyGetPosEx(id)
+                break
+        else:
+            print("no gamepad detected")
+
+        self.run = ret
+        while self.run:
+            time.sleep(0.1)
+            if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():  # detect ESC
+                run = False
+
+            ret, info = self.joyGetPosEx(id)
+            if ret:
+                btns = [(1 << i) & info.dwButtons != 0 for i in range(caps.wNumButtons)]
+                axisXYZ = [info.dwXpos - startinfo.dwXpos, info.dwYpos - startinfo.dwYpos, info.dwZpos - startinfo.dwZpos]
+                axisRUV = [info.dwRpos - startinfo.dwRpos, info.dwUpos - startinfo.dwUpos, info.dwVpos - startinfo.dwVpos]
+                if info.dwButtons:
+                    # print("buttons: ", btns)
+                    self.binding_sticks(x=[0, 0], y=[0, 0], z=[btns[0], btns[2], btns[1], btns[3]],
+                                   table=[btns[6], btns[7]], axis_6=[btns[5],btns[4]])
+
+                if any([abs(v) > 10 for v in axisXYZ]):
+                    # print("axis:", axisXYZ)
+                    self.binding_sticks(x=[axisXYZ[0], axisXYZ[1]], y=[0, 0], z=[0, 0, 0, 0], table=[axisXYZ[2], 0], axis_6=[0,0])
+                if any([abs(v) > 10 for v in axisRUV]):
+                    # print("roation axis:", axisRUV)
+                    self.binding_sticks(x=[0, 0], y=[axisRUV[1], axisRUV[0]], z=[0, 0, 0, 0], table=[0, 0], axis_6=[0,0])
 
 
 
