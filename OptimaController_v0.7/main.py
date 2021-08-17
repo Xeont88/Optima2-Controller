@@ -1,4 +1,4 @@
-import design_v0_7a
+import design_v0_8
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
 import os
@@ -16,10 +16,11 @@ import time
 import ctypes
 
 
-class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
+class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
     axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
     portList = []
     portListDescription = ['Выберите устройство']
+    send_data = 0
 
     def __init__(self, ):
         super().__init__()
@@ -54,6 +55,9 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
 
         self.my_thread = threading.Thread(target=self.gamepad_thread)
         self.my_thread.start()
+
+        self.addPointButton.clicked.connect(self.add_point_in_scenario)
+        self.startScenarioButton.clicked.connect(self.scenario_thread)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Quit?',
@@ -119,6 +123,20 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
         txs += ';'
         self.serial.write(txs.encode())
 
+    def add_point_in_scenario(self):
+        ax1 = (self.lineEdit.text())
+        ax2 = (self.lineEdit_2.text())
+        ax3 = (self.lineEdit_3.text())
+        ax4 = (self.lineEdit_4.text())
+        ax5 = (self.lineEdit_5.text())
+        ax6 = (self.lineEdit_6.text())
+        gripper = (self.lineEdit_7.text())
+        carousel = (self.lineEdit_8.text())
+
+        text = ax1 + ',' + ax2 + ',' + ax3 + ',' + ax4 + ',' + ax5 + ',' + ax6 + ',' + gripper + ',' + carousel + '\n'
+        print('add scenario point', text)
+        self.textEditScenario.insertPlainText(text)
+
     def servo_control(self):
         self.lineEdit.selectAll()
         self.lineEdit.insert(str(self.servoSlider1.value()))
@@ -149,7 +167,7 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
                           self.servoSlider8.value(),
                           0])
 
-    def led_controll(self, val):
+    def led_control(self, val):
         if val == 2:
             val = 1
         s = [0, val, 0]
@@ -267,11 +285,11 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
                 self.listWidget.addItem(file_name)  # добавить файл в listWidget
 
     def laser_on(self):
-        self.led_controll(1)
+        self.led_control(1)
         self.checkBox_LED_13.setChecked(True)
 
     def laser_off(self):
-        self.led_controll(0)
+        self.led_control(0)
         self.checkBox_LED_13.setChecked(False)
 
     # def servoSetFunc(servo):
@@ -430,7 +448,51 @@ class Example(QMainWindow, design_v0_7a.Ui_MainWindow, Gamepad):
                     # print("roation axis:", axisRUV)
                     self.binding_sticks(x=[0, 0], y=[axisRUV[1], axisRUV[0]], z=[0, 0, 0, 0], table=[0, 0], axis_6=[0,0])
 
+    def move_in_point(self, point, serial):
+        print('point=', point)
+        # TODO: цикл выполняется пока все оси не дойдут до своих позиций
+        # while 1:
+        # self.serialSend(serial, [1, point[0],
+        self.serial_send([1, point[0],
+                          point[1],
+                          point[2],
+                          point[3],
+                          point[4],
+                          point[5],
+                          0, 0])
+    def scenario_thread(self):
+        self.sc_thread = threading.Thread(target=self.start_scenario)
+        self.sc_thread.start()
+        print('scenario started')
 
+    def start_scenario(self):
+        self.send_data = 1
+        # print('thread')
+        text = self.textEditScenario.toPlainText()
+        print(text)
+        t = text.split('\n')
+        # print(t)
+        # serial.close()
+        for line in t[:-1]:
+            # try:
+            line = line.split(',')
+            print('line', line)
+            sleep(3)
+            # serial.close()
+
+            # serial1 = QSerialPort()
+            # serial1.setPortName(ui.comboBox.currentText())
+            # serial1.open(QIODevice.ReadWrite)
+            # serial.setPortName(ui.comboBox.currentText())
+            self.move_in_point(line, self.serial)
+            # serial.update()
+
+            # timer = threading.Timer(3, lambda: move_in_point(line))
+            # timer.start()
+            # except:
+            #     print('incorrect command in text edit')
+            #     pass
+        send_data = 0
 
 def main():
     app = QApplication(sys.argv)  # Новый экземпляр QApplication
