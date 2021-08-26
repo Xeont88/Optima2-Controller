@@ -59,6 +59,8 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
         self.startScenarioButton.clicked.connect(self.scenario_thread)
 
+        self.exit_btn.triggered.connect(self.closeEvent)
+
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Quit?',
                                      'Вы действительно хотите выйти?',
