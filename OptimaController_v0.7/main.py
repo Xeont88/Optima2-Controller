@@ -1,4 +1,4 @@
-import design_v0_8
+import design_v0_8a
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
 import os
@@ -8,7 +8,7 @@ from PyQt5.QtCore import QIODevice
 from time import sleep
 from gamepad_class import *
 
-# Работа геймпада. Потоки, функции и мэйнлуп для работы геймпада
+# модули для работы Геймпада
 import threading
 # import joystickapi
 import msvcrt
@@ -16,7 +16,7 @@ import time
 import ctypes
 
 
-class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
+class Example(QMainWindow, design_v0_8a.Ui_MainWindow, Gamepad):
     axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
     portList = []
     portListDescription = ['Выберите устройство']
@@ -52,6 +52,23 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         self.servoSlider7.valueChanged.connect(self.servo_control)
         self.servoSlider8.valueChanged.connect(self.servo_control)
         self.servo_control()
+
+        self.pushButton_1.clicked.connect(self.servo_set_func)
+        self.spinBox_1.valueChanged.connect(self.servo_set_func)
+        self.pushButton_2.clicked.connect(self.servo_set_func)
+        self.spinBox_2.valueChanged.connect(self.servo_set_func)
+        self.pushButton_3.clicked.connect(self.servo_set_func)
+        self.spinBox_3.valueChanged.connect(self.servo_set_func)
+        self.pushButton_4.clicked.connect(self.servo_set_func)
+        self.spinBox_4.valueChanged.connect(self.servo_set_func)
+        self.pushButton_5.clicked.connect(self.servo_set_func)
+        self.spinBox_5.valueChanged.connect(self.servo_set_func)
+        self.pushButton_6.clicked.connect(self.servo_set_func)
+        self.spinBox_6.valueChanged.connect(self.servo_set_func)
+        self.pushButton_7.clicked.connect(self.servo_set_func)
+        self.spinBox_7.valueChanged.connect(self.servo_set_func)
+        self.pushButton_8.clicked.connect(self.servo_set_func)
+        self.spinBox_8.valueChanged.connect(self.servo_set_func)
 
         self.my_thread = threading.Thread(target=self.gamepad_thread)
         self.my_thread.start()
@@ -105,6 +122,8 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
     def refresh_COM(self):
         ports = QSerialPortInfo().availablePorts()
         # ports.clear()
+        self.portList.clear()
+        self.portListDescription.clear()
         for port in ports:
             self.portList.append(port.portName())
             self.portListDescription.append(port.description())
@@ -124,36 +143,36 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         self.serial.write(txs.encode())
 
     def add_point_in_scenario(self):
-        ax1 = (self.lineEdit.text())
-        ax2 = (self.lineEdit_2.text())
-        ax3 = (self.lineEdit_3.text())
-        ax4 = (self.lineEdit_4.text())
-        ax5 = (self.lineEdit_5.text())
-        ax6 = (self.lineEdit_6.text())
-        gripper = (self.lineEdit_7.text())
-        carousel = (self.lineEdit_8.text())
+        ax1 = (self.spinBox_1.text())
+        ax2 = (self.spinBox_2.text())
+        ax3 = (self.spinBox_3.text())
+        ax4 = (self.spinBox_4.text())
+        ax5 = (self.spinBox_5.text())
+        ax6 = (self.spinBox_6.text())
+        gripper = (self.spinBox_7.text())
+        carousel = (self.spinBox_8.text())
 
         text = ax1 + ',' + ax2 + ',' + ax3 + ',' + ax4 + ',' + ax5 + ',' + ax6 + ',' + gripper + ',' + carousel + '\n'
         print('add scenario point', text)
         self.textEditScenario.insertPlainText(text)
 
     def servo_control(self):
-        self.lineEdit.selectAll()
-        self.lineEdit.insert(str(self.servoSlider1.value()))
-        self.lineEdit_2.selectAll()
-        self.lineEdit_2.insert(str(self.servoSlider2.value()))
-        self.lineEdit_3.selectAll()
-        self.lineEdit_3.insert(str(self.servoSlider3.value()))
-        self.lineEdit_4.selectAll()
-        self.lineEdit_4.insert(str(self.servoSlider4.value()))
-        self.lineEdit_5.selectAll()
-        self.lineEdit_5.insert(str(self.servoSlider5.value()))
-        self.lineEdit_6.selectAll()
-        self.lineEdit_6.insert(str(self.servoSlider6.value()))
-        self.lineEdit_7.selectAll()
-        self.lineEdit_7.insert(str(self.servoSlider7.value()))
-        self.lineEdit_8.selectAll()
-        self.lineEdit_8.insert(str(self.servoSlider8.value()))
+        self.spinBox_1.selectAll()
+        self.spinBox_1.setValue((self.servoSlider1.value()))
+        self.spinBox_2.selectAll()
+        self.spinBox_2.setValue((self.servoSlider2.value()))
+        self.spinBox_3.selectAll()
+        self.spinBox_3.setValue((self.servoSlider3.value()))
+        self.spinBox_4.selectAll()
+        self.spinBox_4.setValue((self.servoSlider4.value()))
+        self.spinBox_5.selectAll()
+        self.spinBox_5.setValue((self.servoSlider5.value()))
+        self.spinBox_6.selectAll()
+        self.spinBox_6.setValue((self.servoSlider6.value()))
+        self.spinBox_7.selectAll()
+        self.spinBox_7.setValue((self.servoSlider7.value()))
+        self.spinBox_8.selectAll()
+        self.spinBox_8.setValue((self.servoSlider8.value()))
 
         self.set_axis_list_to()
 
@@ -196,83 +215,83 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
     def servo_set_func(self):
         # TODO: поправить конечные положения шаговиков. -90, 90 и тд.
         try:
-            if int(self.lineEdit.text()) > 120:
-                self.lineEdit.selectAll()
-                self.lineEdit.insert('120')
-            if int(self.lineEdit.text()) < -120:
-                self.lineEdit.selectAll()
-                self.lineEdit.insert('-120')
-            self.servoSlider1.setSliderPosition(int(self.lineEdit.text()))
+            if int(self.spinBox_1.text()) > 120:
+                self.spinBox_1.selectAll()
+                self.spinBox_1.insert('120')
+            if int(self.spinBox_1.text()) < -120:
+                self.spinBox_1.selectAll()
+                self.spinBox_1.insert('-120')
+            self.servoSlider1.setSliderPosition(int(self.spinBox_1.text()))
 
-            if int(self.lineEdit_2.text()) > 120:
-                self.lineEdit_2.selectAll()
-                self.lineEdit_2.insert('120')
-            if int(self.lineEdit_2.text()) < -60:
-                self.lineEdit_2.selectAll()
-                self.lineEdit_2.insert('-60')
-            self.servoSlider2.setSliderPosition(int(self.lineEdit_2.text()))
+            if int(self.spinBox_2.text()) > 120:
+                self.spinBox_2.selectAll()
+                self.spinBox_2.insert('120')
+            if int(self.spinBox_2.text()) < -60:
+                self.spinBox_2.selectAll()
+                self.spinBox_2.insert('-60')
+            self.servoSlider2.setSliderPosition(int(self.spinBox_2.text()))
 
-            if int(self.lineEdit_3.text()) > 120:
-                self.lineEdit_3.selectAll()
-                self.lineEdit_3.insert('120')
-            if int(self.lineEdit_3.text()) < -60:
-                self.lineEdit_3.selectAll()
-                self.lineEdit_3.insert('-60')
-            self.servoSlider3.setSliderPosition(int(self.lineEdit_3.text()))
+            if int(self.spinBox_3.text()) > 120:
+                self.spinBox_3.selectAll()
+                self.spinBox_3.insert('120')
+            if int(self.spinBox_3.text()) < -60:
+                self.spinBox_3.selectAll()
+                self.spinBox_3.insert('-60')
+            self.servoSlider3.setSliderPosition(int(self.spinBox_3.text()))
 
-            if int(self.lineEdit_4.text()) > 90:
-                self.lineEdit_4.selectAll()
-                self.lineEdit_4.insert('90')
-            if int(self.lineEdit_4.text()) < -90:
-                self.lineEdit_4.selectAll()
-                self.lineEdit_4.insert('-90')
-            self.servoSlider4.setSliderPosition(int(self.lineEdit_4.text()))
+            if int(self.spinBox_4.text()) > 90:
+                self.spinBox_4.selectAll()
+                self.spinBox_4.insert('90')
+            if int(self.spinBox_4.text()) < -90:
+                self.spinBox_4.selectAll()
+                self.spinBox_4.insert('-90')
+            self.servoSlider4.setSliderPosition(int(self.spinBox_4.text()))
 
-            if int(self.lineEdit_5.text()) > 90:
-                self.lineEdit_5.selectAll()
-                self.lineEdit_5.insert('90')
-            if int(self.lineEdit_5.text()) < -90:
-                self.lineEdit_5.selectAll()
-                self.lineEdit_5.insert('-90')
-            self.servoSlider5.setSliderPosition(int(self.lineEdit_5.text()))
+            if int(self.spinBox_5.text()) > 90:
+                self.spinBox_5.selectAll()
+                self.spinBox_5.insert('90')
+            if int(self.spinBox_5.text()) < -90:
+                self.spinBox_5.selectAll()
+                self.spinBox_5.insert('-90')
+            self.servoSlider5.setSliderPosition(int(self.spinBox_5.text()))
 
-            if int(self.lineEdit_6.text()) > 90:
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('90')
-            if int(self.lineEdit_6.text()) < -90:
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('-90')
-            self.servoSlider6.setSliderPosition(int(self.lineEdit_6.text()))
+            if int(self.spinBox_6.text()) > 90:
+                self.spinBox_6.selectAll()
+                self.spinBox_6.insert('90')
+            if int(self.spinBox_6.text()) < -90:
+                self.spinBox_6.selectAll()
+                self.spinBox_6.insert('-90')
+            self.servoSlider6.setSliderPosition(int(self.spinBox_6.text()))
 
-            if int(self.lineEdit_7.text()) > 100:
-                self.lineEdit_7.selectAll()
-                self.lineEdit_7.insert('100')
-            if int(self.lineEdit_7.text()) < 0:
-                self.lineEdit_7.selectAll()
-                self.lineEdit_7.insert('0')
-            self.servoSlider7.setSliderPosition(int(self.lineEdit_7.text()))
+            if int(self.spinBox_7.text()) > 100:
+                self.spinBox_7.selectAll()
+                self.spinBox_7.insert('100')
+            if int(self.spinBox_7.text()) < 0:
+                self.spinBox_7.selectAll()
+                self.spinBox_7.insert('0')
+            self.servoSlider7.setSliderPosition(int(self.spinBox_7.text()))
 
-            if int(self.lineEdit_8.text()) > 360:
-                self.lineEdit_8.selectAll()
-                self.lineEdit_8.insert('360')
-            if int(self.lineEdit_8.text()) < -360:
-                self.lineEdit_8.selectAll()
-                self.lineEdit_8.insert('-360')
-            self.servoSlider8.setSliderPosition(int(self.lineEdit_8.text()))
+            if int(self.spinBox_8.text()) > 360:
+                self.spinBox_8.selectAll()
+                self.spinBox_8.insert('360')
+            if int(self.spinBox_8.text()) < -360:
+                self.spinBox_8.selectAll()
+                self.spinBox_8.insert('-360')
+            self.servoSlider8.setSliderPosition(int(self.spinBox_8.text()))
 
             self.set_axis_list_to()
         except:
             print("don't do that!")
 
     def set_axis_list_to(self):
-        self.axis_list[0] = int(self.lineEdit.text())
-        self.axis_list[1] = int(self.lineEdit_2.text())
-        self.axis_list[2] = int(self.lineEdit_3.text())
-        self.axis_list[3] = int(self.lineEdit_4.text())
-        self.axis_list[4] = int(self.lineEdit_5.text())
-        self.axis_list[5] = int(self.lineEdit_6.text())
-        self.axis_list[6] = int(self.lineEdit_7.text())
-        self.axis_list[7] = int(self.lineEdit_8.text())
+        self.axis_list[0] = int(self.spinBox_1.text())
+        self.axis_list[1] = int(self.spinBox_2.text())
+        self.axis_list[2] = int(self.spinBox_3.text())
+        self.axis_list[3] = int(self.spinBox_4.text())
+        self.axis_list[4] = int(self.spinBox_5.text())
+        self.axis_list[5] = int(self.spinBox_6.text())
+        self.axis_list[6] = int(self.spinBox_7.text())
+        self.axis_list[7] = int(self.spinBox_8.text())
 
     def browse_folder(self):
         self.listWidget.clear()  # На случай, если в списке уже есть элементы
@@ -298,82 +317,82 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         try:
             if int(self.axis_list[0]) > 120:
                 self.axis_list[0] = 120
-                self.lineEdit.selectAll()
-                self.lineEdit.insert('120')
+                self.spinBox_1.selectAll()
+                self.spinBox_1.insert('120')
             if int(self.axis_list[0]) < -120:
                 self.axis_list[0] = -120
-                self.lineEdit.selectAll()
-                self.lineEdit.insert('-120')
+                self.spinBox_1.selectAll()
+                self.spinBox_1.insert('-120')
             self.servoSlider1.setSliderPosition(int(self.axis_list[0]))
 
             if int(self.axis_list[1]) > 120:
                 self.axis_list[1] = 120
-                self.lineEdit_2.selectAll()
-                self.lineEdit_2.insert('120')
+                self.spinBox_2.selectAll()
+                self.spinBox_2.insert('120')
             if int(self.axis_list[1]) < -60:
                 self.axis_list[1] = -60
-                self.lineEdit_2.selectAll()
-                self.lineEdit_2.insert('-60')
+                self.spinBox_2.selectAll()
+                self.spinBox_2.insert('-60')
             self.servoSlider2.setSliderPosition(int(self.axis_list[1]))
 
             if int(self.axis_list[2]) > 120:
                 self.axis_list[2] = 120
-                self.lineEdit_3.selectAll()
-                self.lineEdit_3.insert('120')
+                self.spinBox_3.selectAll()
+                self.spinBox_3.insert('120')
             if int(self.axis_list[2]) < -60:
                 self.axis_list[2] = -60
-                self.lineEdit_3.selectAll()
-                self.lineEdit_3.insert('-60')
+                self.spinBox_3.selectAll()
+                self.spinBox_3.insert('-60')
             self.servoSlider3.setSliderPosition(int(self.axis_list[2]))
 
             if int(self.axis_list[3]) > 90:
                 self.axis_list[3] = 90
-                self.lineEdit_4.selectAll()
-                self.lineEdit_4.insert('90')
+                self.spinBox_4.selectAll()
+                self.spinBox_4.insert('90')
             if int(self.axis_list[3]) < -90:
                 self.axis_list[3] = -90
-                self.lineEdit_4.selectAll()
-                self.lineEdit_4.insert('-90')
+                self.spinBox_4.selectAll()
+                self.spinBox_4.insert('-90')
             self.servoSlider4.setSliderPosition(int(self.axis_list[3]))
 
             if int(self.axis_list[4]) > 90:
                 self.axis_list[4] = 90
-                self.lineEdit_5.selectAll()
-                self.lineEdit_5.insert('90')
+                self.spinBox_5.selectAll()
+                self.spinBox_5.insert('90')
             if int(self.axis_list[4]) < -90:
                 self.axis_list[4] = -90
-                self.lineEdit_5.selectAll()
-                self.lineEdit_5.insert('-90')
+                self.spinBox_5.selectAll()
+                self.spinBox_5.insert('-90')
             self.servoSlider5.setSliderPosition(int(self.axis_list[4]))
 
             if int(self.axis_list[5]) > 90:
                 self.axis_list[5] = 90
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('90')
+                self.spinBox_6.selectAll()
+                self.spinBox_6.insert('90')
             if int(self.axis_list[5]) < -90:
                 self.axis_list[5] = -90
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('-90')
+                self.spinBox_6.selectAll()
+                self.spinBox_6.insert('-90')
             self.servoSlider6.setSliderPosition(int(self.axis_list[5]))
 
             if int(self.axis_list[6]) > 100:
                 self.axis_list[6] = 100
-                self.lineEdit_7.selectAll()
-                self.lineEdit_7.insert('100')
+                self.spinBox_7.selectAll()
+                self.spinBox_7.insert('100')
             if int(self.axis_list[6]) < 0:
                 self.axis_list[6] = 0
-                self.lineEdit_7.selectAll()
-                self.lineEdit_7.insert('0')
+                self.spinBox_7.selectAll()
+                self.spinBox_7.insert('0')
             self.servoSlider7.setSliderPosition(int(self.axis_list[6]))
 
             if int(self.axis_list[7]) > 360:
                 self.axis_list[7] = 360
-                self.lineEdit_8.selectAll()
-                self.lineEdit_8.insert('360')
+                self.spinBox_8.selectAll()
+                self.spinBox_8.insert('360')
             if int(self.axis_list[7]) < -360:
                 self.axis_list[7] = -360
-                self.lineEdit_8.selectAll()
-                self.lineEdit_8.insert('-360')
+                self.spinBox_8.selectAll()
+                self.spinBox_8.insert('-360')
             self.servoSlider8.setSliderPosition(int(self.axis_list[7]))
 
         except:
