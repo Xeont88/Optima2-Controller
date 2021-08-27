@@ -17,41 +17,41 @@ import ctypes
 
 
 
-class ScenarioThread(QObject):
-    running = False
-    newPositionPoint = pyqtSignal(list)
-
-    def run(self):
-        while self.running:
-            self.newPositionPoint.emit(['some info'])
-            print('running in "scenario thread"')
-            QThread.msleep(2000)
-
-
-class OptimaSerial(QSerialPortInfo, design_v0_8.Ui_MainWindow):
-
-    portList = []
-    portListDescription = ['Выберите устройство']
-
-    def __init__(self, parent=None):
-        super(OptimaSerial, self).__init__(parent)
-        self.serial = QSerialPort(self)
-        self.serial.setBaudRate(115200)
-
-        ports = QSerialPortInfo().availablePorts()
-        for port in ports:
-            self.portList.append(port.portName())
-            self.portListDescription.append(port.description())
-        self.comboBox.addItems(self.portList)
+# class ScenarioThread(QObject):
+#     running = False
+#     newPositionPoint = pyqtSignal(list)
+#
+#     def run(self):
+#         while self.running:
+#             self.newPositionPoint.emit(['some info'])
+#             print('running in "scenario thread"')
+#             QThread.msleep(2000)
 
 
-    def available_ports(self):
-        available_comport_list = ['']
-        self.my_ports = QSerialPorts()
-        ports = self.my_ports.availablePorts()
-        for port in ports:
-            available_comport_list.append(port_name)
-        return available_comport_list
+# class OptimaSerial(QSerialPortInfo, design_v0_8.Ui_MainWindow):
+#
+#     portList = []
+#     portListDescription = ['Выберите устройство']
+#
+#     def __init__(self, parent=None):
+#         super(OptimaSerial, self).__init__(parent)
+#         self.serial = QSerialPort(self)
+#         self.serial.setBaudRate(115200)
+#
+#         ports = QSerialPortInfo().availablePorts()
+#         for port in ports:
+#             self.portList.append(port.portName())
+#             self.portListDescription.append(port.description())
+#         self.comboBox.addItems(self.portList)
+#
+#
+#     def available_ports(self):
+#         available_comport_list = ['']
+#         self.my_ports = QSerialPorts()
+#         ports = self.my_ports.availablePorts()
+#         for port in ports:
+#             available_comport_list.append(port_name)
+#         return available_comport_list
 
 
 class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
@@ -67,11 +67,11 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
-        self.serial_init()
         # Serial connections
+        self.serial_init()
         self.serial.readyRead.connect(self.on_read)
         self.refreshCOMbutton.clicked.connect(self.refresh_COM)
-        self.connectButton.clicked.connect(self.on_open)
+        self.connectButton.clicked.connect(self.on_open1)
         self.ejectButton.clicked.connect(self.on_close)
 
         # RGB control
@@ -97,17 +97,17 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
         self.startScenarioButton.clicked.connect(self.scenario_thread)
 
-        self.scenario2_thread = QThread()
-        self.scenarioThread = ScenarioThread()
-        self.scenarioThread.running = True
-        self.scenarioThread.moveToThread(self.scenario2_thread)
-        self.scenarioThread.newPositionPoint.connect(self.addNewPosPoint)
-        self.scenario2_thread.started.connect(self.scenarioThread.run)
-        self.scenario2_thread.start()
+        # self.scenario2_thread = QThread()
+        # self.scenarioThread = ScenarioThread()
+        # self.scenarioThread.running = True
+        # self.scenarioThread.moveToThread(self.scenario2_thread)
+        # self.scenarioThread.newPositionPoint.connect(self.addNewPosPoint)
+        # self.scenario2_thread.started.connect(self.scenarioThread.run)
+        # self.scenario2_thread.start()
 
-    @pyqtSlot(list)
-    def addNewPosPoint(self, string):
-        self.textEditScenario.insertPlainText(string[0])
+    # @pyqtSlot(list)
+    # def addNewPosPoint(self, string):
+    #     self.textEditScenario.insertPlainText(string[0])
 
 
 
@@ -142,6 +142,24 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         data = rxs.split(' ')
         print(data)
 
+    def on_open2(self):
+        self.serial.setPortName(self.comboBox.currentText())
+        answer = self.serial.open(QIODevice.ReadWrite)
+        print('connected to', self.comboBox.currentText())
+        print('answer =', answer)
+        if answer:
+            self.connectLabel.setText('Подключено')
+
+        # while 1:
+        #     sleep(0.01)
+        # sleep(2)
+        # serialSend([1, 50, 0, 0, 0, 0, 0, 0, 0])
+
+    def on_open1(self):
+        my_thread = threading.Thread(target=self.on_open2)
+        my_thread.start()
+        # ui.connectLabel.setText('Подключено')
+
     def on_open(self):
         self.serial.setPortName(self.comboBox.currentText())
         answer = self.serial.open(QIODevice.ReadWrite)
@@ -175,6 +193,7 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         txs += ';'
         self.serial.write(txs.encode())
         self.serial.waitForBytesWritten(10)
+        print("serial send", txs)
 
     def add_point_in_scenario(self):
         ax1 = (self.lineEdit.text())
@@ -480,6 +499,7 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
 
         self.run = ret
         while self.run:
+            # QThread.sleep(100)
             time.sleep(0.1)
             if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():  # detect ESC
                 run = False
