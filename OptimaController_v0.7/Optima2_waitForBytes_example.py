@@ -71,7 +71,7 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         self.serial_init()
         self.serial.readyRead.connect(self.on_read)
         self.refreshCOMbutton.clicked.connect(self.refresh_COM)
-        self.connectButton.clicked.connect(self.on_open1)
+        self.connectButton.clicked.connect(self.on_open)
         self.ejectButton.clicked.connect(self.on_close)
 
         # RGB control
@@ -533,10 +533,23 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
                           point[4],
                           point[5],
                           0, 0])
+
     def scenario_thread(self):
         self.sc_thread = threading.Thread(target=self.start_scenario)
         self.sc_thread.start()
         print('scenario started')
+
+    def finding_longest_way(self, last_axes, new_axes):
+        longest_way = 0
+        i = 0
+        for axis in new_axes[:-1]:
+            print('last & new', last_axes[i], axis)
+            if longest_way < abs(int(axis)-int(last_axes[i])):
+                longest_way = abs(int(axis)-int(last_axes[i]))
+            i += 1
+
+        print('longest_way =', longest_way)
+        return longest_way
 
     def start_scenario(self):
         self.send_data = 1
@@ -546,11 +559,14 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
         t = text.split('\n')
         # print(t)
         # serial.close()
+        last_axes = self.axis_list
+        i = 0
         for line in t[:-1]:
             # try:
             line = line.split(',')
             print('line', line)
-            sleep(3)
+            delay = self.finding_longest_way(last_axes, line)
+            last_axes = line
             # serial.close()
 
             # serial1 = QSerialPort()
@@ -559,13 +575,16 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
             # serial.setPortName(ui.comboBox.currentText())
             self.move_in_point(line, self.serial)
             # serial.update()
-
+            sleep(delay*0.09)
+            i += 1
+            print('end of line', i)
             # timer = threading.Timer(3, lambda: move_in_point(line))
             # timer.start()
             # except:
             #     print('incorrect command in text edit')
             #     pass
         send_data = 0
+        print('scenario over')
 
 def main():
     app = QApplication(sys.argv)  # Новый экземпляр QApplication
