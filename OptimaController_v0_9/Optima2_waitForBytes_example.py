@@ -30,6 +30,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         self.gamepad_init()
         self.setupUi(self)
         self.home_button.setToolTip("Установить оси в исходное положение")
+        self.open_file_button.triggered.connect(self.open_scenario_file)
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
@@ -92,6 +93,24 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
     # @pyqtSlot(list)
     # def addNewPosPoint(self, string):
     #     self.textEditScenario.insertPlainText(string[0])
+
+    def open_scenario_file(self):
+        # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        fname = QFileDialog.getOpenFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
+                                  "/data/highlighted_file.txt", filter="Text Files (*.txt)")
+
+        print(fname)
+        try:
+            # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
+            print('open')
+            f = open(fname[0], 'r')
+            # with f:
+            data = f.read()
+            print(data)
+            self.textEditScenario.selectAll()
+            self.textEditScenario.setText(data)
+        except:
+            pass
 
     def go_home(self):
         self.servoSlider1.setSliderPosition(0)
@@ -525,8 +544,11 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         sending_data = [1]
         i = 0
         for a in point:
-            sending_data.append(int(point[i]))
+            sending_data.append(point[i])
             i += 1
+        print('sending data', sending_data[-1])
+        if sending_data[-1] == ' ':
+            sending_data = sending_data[:-1]
 
         self.serial_send(sending_data)
 
