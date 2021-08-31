@@ -15,43 +15,8 @@ import msvcrt
 import time
 import ctypes
 
-
-
-# class ScenarioThread(QObject):
-#     running = False
-#     newPositionPoint = pyqtSignal(list)
-#
-#     def run(self):
-#         while self.running:
-#             self.newPositionPoint.emit(['some info'])
-#             print('running in "scenario thread"')
-#             QThread.msleep(2000)
-
-
-# class OptimaSerial(QSerialPortInfo, design_v0_8.Ui_MainWindow):
-#
-#     portList = []
-#     portListDescription = ['Выберите устройство']
-#
-#     def __init__(self, parent=None):
-#         super(OptimaSerial, self).__init__(parent)
-#         self.serial = QSerialPort(self)
-#         self.serial.setBaudRate(115200)
-#
-#         ports = QSerialPortInfo().availablePorts()
-#         for port in ports:
-#             self.portList.append(port.portName())
-#             self.portListDescription.append(port.description())
-#         self.comboBox.addItems(self.portList)
-#
-#
-#     def available_ports(self):
-#         available_comport_list = ['']
-#         self.my_ports = QSerialPorts()
-#         ports = self.my_ports.availablePorts()
-#         for port in ports:
-#             available_comport_list.append(port_name)
-#         return available_comport_list
+# разделитель между значениями осей, в сценарияз
+delimit = ' '
 
 
 class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
@@ -64,6 +29,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         super().__init__()
         self.gamepad_init()
         self.setupUi(self)
+        self.home_button.setToolTip("Установить оси в исходное положение")
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
@@ -90,6 +56,23 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         self.servoSlider7.valueChanged.connect(self.servo_control)
         self.servoSlider8.valueChanged.connect(self.servo_control)
         self.servo_control()
+
+        #
+        self.pushButton_1.clicked.connect(self.servo_set_func)
+        self.lineEdit.returnPressed.connect(self.servo_set_func)
+        self.pushButton_2.clicked.connect(self.servo_set_func)
+        self.lineEdit_2.returnPressed.connect(self.servo_set_func)
+        self.pushButton_3.clicked.connect(self.servo_set_func)
+        self.lineEdit_3.returnPressed.connect(self.servo_set_func)
+        self.pushButton_4.clicked.connect(self.servo_set_func)
+        self.lineEdit_4.returnPressed.connect(self.servo_set_func)
+        self.pushButton_5.clicked.connect(self.servo_set_func)
+        self.lineEdit_5.returnPressed.connect(self.servo_set_func)
+        self.pushButton_6.clicked.connect(self.servo_set_func)
+        self.lineEdit_6.returnPressed.connect(self.servo_set_func)
+        self.pushButton_7.clicked.connect(self.servo_set_func)
+        self.lineEdit_7.returnPressed.connect(self.servo_set_func)
+
 
         self.my_thread = threading.Thread(target=self.gamepad_thread)
         self.my_thread.start()
@@ -207,6 +190,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         print("serial send", txs)
 
     def add_point_in_scenario(self):
+
         ax1 = (self.lineEdit.text())
         ax2 = (self.lineEdit_2.text())
         ax3 = (self.lineEdit_3.text())
@@ -216,7 +200,8 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         gripper = (self.lineEdit_7.text())
         carousel = (self.lineEdit_8.text())
 
-        text = ax1 + ',' + ax2 + ',' + ax3 + ',' + ax4 + ',' + ax5 + ',' + ax6 + ',' + gripper + ',' + carousel + '\n'
+        text = ax1 + delimit + ax2 + delimit + ax3 + delimit + ax4 + delimit + ax5 + delimit\
+               + ax6 + delimit + gripper + delimit + carousel + '\n'
         print('add scenario point', text)
         self.textEditScenario.insertPlainText(text)
 
@@ -376,7 +361,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         self.checkBox_LED_13.setChecked(False)
 
     # def servoSetFunc(servo):
-    def axisSetFunc(self):
+    def axis_set_func(self):
 
         try:
             if int(self.axis_list[0]) > 120:
@@ -491,7 +476,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
             # ui.checkBox_LED_13.setChecked(False)
 
         # print(axis_list)
-        self.axisSetFunc()
+        self.axis_set_func()
 
     def gamepad_thread(self):
         print("start of gamepad script")
@@ -537,13 +522,13 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         # TODO: цикл выполняется пока все оси не дойдут до своих позиций
         # while 1:
         # self.serialSend(serial, [1, point[0],
-        self.serial_send([1, point[0],
-                          point[1],
-                          point[2],
-                          point[3],
-                          point[4],
-                          point[5],
-                          0, 0])
+        sending_data = [1]
+        i = 0
+        for a in point:
+            sending_data.append(int(point[i]))
+            i += 1
+
+        self.serial_send(sending_data)
 
     def scenario_thread(self):
         self.sc_thread = threading.Thread(target=self.start_scenario)
@@ -574,7 +559,7 @@ class Example(QMainWindow, design_v0_9.Ui_MainWindow, Gamepad):
         i = 0
         for line in t[:-1]:
             # try:
-            line = line.split(',')
+            line = line.split(delimit)
             print('line', line)
             delay = self.finding_longest_way(last_axes, line)
             last_axes = line

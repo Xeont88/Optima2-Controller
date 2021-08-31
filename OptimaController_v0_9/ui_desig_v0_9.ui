@@ -899,6 +899,12 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string notr="true" comment="Установить все оси в домашнее положение" extracomment="Установить все оси в домашнее положение"/>
+    </property>
+    <property name="whatsThis">
+     <string notr="true" extracomment="Set axes in 0"/>
+    </property>
     <property name="text">
      <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
     </property>

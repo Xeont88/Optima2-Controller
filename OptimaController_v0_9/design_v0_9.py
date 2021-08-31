@@ -391,6 +391,8 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.connectLabel, 0, 2, 1, 1)
         self.home_button = QtWidgets.QPushButton(self.centralwidget)
         self.home_button.setGeometry(QtCore.QRect(580, 12, 31, 31))
+        self.home_button.setToolTip("")
+        self.home_button.setWhatsThis("")
         self.home_button.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("home.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -476,4 +478,4 @@ class Ui_MainWindow(object):
         self.action_2.setText(_translate("MainWindow", "Сохранить"))
         self.action_3.setText(_translate("MainWindow", "Информация"))
         self.exit_btn.setText(_translate("MainWindow", "Выход"))
-
+import resource_rc
