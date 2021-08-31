@@ -575,7 +575,7 @@ class Example(QMainWindow, design_v0_8.Ui_MainWindow, Gamepad):
             # serial.setPortName(ui.comboBox.currentText())
             self.move_in_point(line, self.serial)
             # serial.update()
-            sleep(delay*0.09)
+            sleep(delay*0.07)
             i += 1
             print('end of line', i)
             # timer = threading.Timer(3, lambda: move_in_point(line))
