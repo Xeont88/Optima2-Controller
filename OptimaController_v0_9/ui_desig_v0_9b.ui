@@ -50,7 +50,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -798,6 +798,18 @@
        <layout class="QVBoxLayout" name="generalContainer">
         <item>
          <layout class="QHBoxLayout" name="menuContainer">
+          <property name="leftMargin">
+           <number>5</number>
+          </property>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QLineEdit" name="adressLine">
             <property name="font">
@@ -937,6 +949,9 @@ color: black;
           </item>
           <item>
            <layout class="QHBoxLayout" name="bottomContainer">
+            <property name="rightMargin">
+             <number>10</number>
+            </property>
             <item alignment="Qt::AlignBottom">
              <widget class="QTextBrowser" name="logShower">
               <property name="enabled">
@@ -1296,10 +1311,20 @@ color: black;
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+       </property>
       </widget>
      </item>
      <item row="0" column="4">
       <widget class="QPushButton" name="connectButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -1311,6 +1336,20 @@ color: black;
      </item>
      <item row="0" column="5">
       <widget class="QPushButton" name="ejectButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -1341,6 +1380,11 @@ color: black;
        <property name="toolTip">
         <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -1356,7 +1400,7 @@ color: black;
     <property name="geometry">
      <rect>
       <x>580</x>
-      <y>12</y>
+      <y>10</y>
       <width>31</width>
       <height>31</height>
      </rect>
@@ -1381,6 +1425,68 @@ color: black;
     <property name="icon">
      <iconset>
       <normaloff>home.png</normaloff>home.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="play_button">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>10</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string notr="true" comment="Установить все оси в домашнее положение" extracomment="Установить все оси в домашнее положение"/>
+    </property>
+    <property name="whatsThis">
+     <string notr="true" extracomment="Set axes in 0"/>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+    </property>
+    <property name="text">
+     <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>play.png</normaloff>play.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="plus_button">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>10</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string notr="true" comment="Установить все оси в домашнее положение" extracomment="Установить все оси в домашнее положение"/>
+    </property>
+    <property name="whatsThis">
+     <string notr="true" extracomment="Set axes in 0"/>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: #cccccc;
+color: black;
+</string>
+    </property>
+    <property name="text">
+     <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>add.png</normaloff>add.png</iconset>
     </property>
    </widget>
   </widget>

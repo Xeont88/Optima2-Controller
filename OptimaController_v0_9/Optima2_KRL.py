@@ -1,4 +1,4 @@
-import design_v0_9a
+import design_v0_9b
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
 import os
@@ -25,7 +25,7 @@ import ctypes
 delimit = ' '
 
 
-class Example(QMainWindow, design_v0_9a.Ui_MainWindow, Gamepad):
+class Example(QMainWindow, design_v0_9b.Ui_MainWindow, Gamepad):
     axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
     portList = []
     portListDescription = ['Выберите устройство']
@@ -36,6 +36,12 @@ class Example(QMainWindow, design_v0_9a.Ui_MainWindow, Gamepad):
         self.gamepad_init()
         self.setupUi(self)
         self.home_button.setToolTip("Установить оси в исходное положение")
+        self.comboBox.setToolTip("Список СОМ-портов")
+        self.play_button.setToolTip("Запустить программу")
+        self.plus_button.setToolTip("Добавить позицию в сценарий")
+        self.refreshCOMbutton.setToolTip("Обновить список СОМ-портов")
+        self.connectButton.setToolTip("Подключиться к роботу")
+        self.ejectButton.setToolTip("Отключить соединение")
         self.open_file_button.triggered.connect(self.open_scenario_file)
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
@@ -85,7 +91,9 @@ class Example(QMainWindow, design_v0_9a.Ui_MainWindow, Gamepad):
         self.my_thread.start()
 
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
+        self.plus_button.clicked.connect(self.add_point_in_scenario)
         self.startScenarioButton.clicked.connect(self.scenario_thread)
+        self.play_button.clicked.connect(self.scenario_thread)
         self.home_button.clicked.connect(self.go_home)
 
         # KRL
@@ -646,6 +654,7 @@ END''')  # Назначаем стартовый текст
         varDictionary = dict()
         varNameDictionary = dict()
         text = self.codeEditor.toPlainText()
+        self.textEditScenario.selectAll()
         strokes = text.split('\n')  # Получаем текст в виде списка строк
         defTemplate = re.compile(
             r'^(\s+)?DEF(\s+){1}(?P<objectName>\w{1,24})(\s+)?\((\s+)?(?P<objectParams>(.+)?)\)(\s+)?$')  # Шаблон для объявления объекта
@@ -720,6 +729,7 @@ END''')  # Назначаем стартовый текст
                     isIfStarted=False
 
         print('Словарь вне функции:', varNameDictionary)
+        self.logShower.setText('Compiled!')
 
     def ifConditionDeterminer(self, exeCondition):
         #print ('Условие: ', exeCondition)
@@ -916,19 +926,24 @@ END''')  # Назначаем стартовый текст
                     if i is None:
                         #print('Нет последнего значения')
                         file.write('0 ')
+                        self.textEditScenario.insertPlainText('0 ')
                     else:
                         #print('Есть последнее значение')
                         file.write(str(i) + ' ')
+                        self.textEditScenario.insertPlainText(str(i) + ' ')
                     file.write('\n')
+                    self.textEditScenario.insertPlainText('\n')
                     file.close()
                     break
                 else:
                     if i is None:
                         #print('Нет значения')
                         file.write('0 ')
+                        self.textEditScenario.insertPlainText('0 ')
                     else:
                         #print('Есть значение')
                         file.write(str(i) + ' ')
+                        self.textEditScenario.insertPlainText(str(i) + ' ')
                 counter += 1
         elif angleDescription:
             #print('Точка в обобщенных координатах')
@@ -950,19 +965,24 @@ END''')  # Назначаем стартовый текст
                     if i is None:
                         #print('Нет последнего значения')
                         file.write('0 ')
+                        self.textEditScenario.insertPlainText('0 ')
                     else:
                         #print('Есть последнее значение')
                         file.write(str(i) + ' ')
+                        self.textEditScenario.insertPlainText(str(i) + ' ')
                     file.write('\n')
+                    self.textEditScenario.insertPlainText('\n')
                     file.close()
                     break
                 else:
                     if i is None:
                         #print('Нет значения')
                         file.write('0 ')
+                        self.textEditScenario.insertPlainText('0 ')
                     else:
                         #print('Есть значение')
                         file.write(str(i) + ' ')
+                        self.textEditScenario.insertPlainText(str(i) + ' ')
                 counter += 1
 
 def main():
