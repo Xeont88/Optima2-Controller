@@ -34,7 +34,11 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Подключение к СОМ порту</string>
+   <string>Optima-2 Controller</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/Optima2/zarnitza64g.ico</normaloff>:/Optima2/zarnitza64g.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
@@ -50,7 +54,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -1017,8 +1021,8 @@ color: black;
                  <colorrole role="PlaceholderText">
                   <brush brushstyle="NoBrush">
                    <color alpha="128">
-                    <red>0</red>
-                    <green>0</green>
+                    <red>255</red>
+                    <green>165</green>
                     <blue>0</blue>
                    </color>
                   </brush>
@@ -1147,8 +1151,8 @@ color: black;
                  <colorrole role="PlaceholderText">
                   <brush brushstyle="NoBrush">
                    <color alpha="128">
-                    <red>0</red>
-                    <green>0</green>
+                    <red>255</red>
+                    <green>165</green>
                     <blue>0</blue>
                    </color>
                   </brush>
@@ -1329,8 +1333,8 @@ color: black;
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>connected.png</normaloff>connected.png</iconset>
+        <iconset resource="resource.qrc">
+         <normaloff>:/Optima2/connected.png</normaloff>:/Optima2/connected.png</iconset>
        </property>
       </widget>
      </item>
@@ -1354,8 +1358,8 @@ color: black;
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>disconnected.png</normaloff>disconnected.png</iconset>
+        <iconset resource="resource.qrc">
+         <normaloff>:/Optima2/disconnected.png</normaloff>:/Optima2/disconnected.png</iconset>
        </property>
       </widget>
      </item>
@@ -1389,8 +1393,8 @@ color: black;
         <string/>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>refresh.png</normaloff>refresh.png</iconset>
+        <iconset resource="resource.qrc">
+         <normaloff>:/Optima2/refresh.png</normaloff>:/Optima2/refresh.png</iconset>
        </property>
       </widget>
      </item>
@@ -1423,8 +1427,8 @@ color: black;
      <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>home.png</normaloff>home.png</iconset>
+     <iconset resource="resource.qrc">
+      <normaloff>:/Optima2/home.png</normaloff>:/Optima2/home.png</iconset>
     </property>
    </widget>
    <widget class="QPushButton" name="play_button">
@@ -1454,8 +1458,8 @@ color: black;
      <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>play.png</normaloff>play.png</iconset>
+     <iconset resource="resource.qrc">
+      <normaloff>:/Optima2/play.png</normaloff>:/Optima2/play.png</iconset>
     </property>
    </widget>
    <widget class="QPushButton" name="plus_button">
@@ -1485,8 +1489,8 @@ color: black;
      <string comment="Установить оси в исходное положение1" extracomment="Установить оси в исходное положение2"/>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>add.png</normaloff>add.png</iconset>
+     <iconset resource="resource.qrc">
+      <normaloff>:/Optima2/add.png</normaloff>:/Optima2/add.png</iconset>
     </property>
    </widget>
   </widget>

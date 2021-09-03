@@ -21,11 +21,18 @@ import msvcrt
 import time
 import ctypes
 
-# разделитель между значениями осей, в сценарияз
+# разделитель между значениями осей, в сценариях
 delimit = ' '
+point_delay = 0.08
 
 
 class Example(QMainWindow, design_v0_9b.Ui_MainWindow, Gamepad):
+    '''
+    Главный класс приложения.
+    Работа GUI.
+    Работа с потоками Serial, Сценария, и Gamepad.
+
+    '''
     axis_list = [0, 0, 0, 0, 0, 0, 0, 0]
     portList = []
     portListDescription = ['Выберите устройство']
@@ -615,7 +622,7 @@ END''')  # Назначаем стартовый текст
             # serial.setPortName(ui.comboBox.currentText())
             self.move_in_point(line)
             # serial.update()
-            sleep(delay*0.07)
+            sleep(delay*point_delay)
             i += 1
             print('end of line', i)
             # timer = threading.Timer(3, lambda: move_in_point(line))
@@ -649,87 +656,90 @@ END''')  # Назначаем стартовый текст
             self.logShower.repaint()
 
     def parser(self):
-        isObjectCreated = False  # флаг создания объекта
-        isVarIniStarted = False  # флаг начала инициализации переменных
-        varDictionary = dict()
-        varNameDictionary = dict()
-        text = self.codeEditor.toPlainText()
-        self.textEditScenario.selectAll()
-        strokes = text.split('\n')  # Получаем текст в виде списка строк
-        defTemplate = re.compile(
-            r'^(\s+)?DEF(\s+){1}(?P<objectName>\w{1,24})(\s+)?\((\s+)?(?P<objectParams>(.+)?)\)(\s+)?$')  # Шаблон для объявления объекта
-        declTemplate = re.compile(
-            r'^(\s+)?DECL(\s+){1}(?P<varType>(INT|REAL|BOOL|CHAR|POS))(\s+){1}(?P<varName>\w{1,24})(\s+)?$')  # Шаблон для объявления переменных
-        iniTemplate = re.compile(r'(\s+)?INI(\s+)?')  # Шаблон для начала инициализации переменных
-        varTemplate = re.compile(r'^(\s+)?(?P<varIni>\w{1,24})(\s+)?\=(\s+)?(?P<varValue>.+)(\s+)?$')
-        ptpCommonTemplate = re.compile(r'^(\s+)?PTP(\s+){1}(?P<pointName>\w{1,24})(\s+)?$')
-        linCommonTemplate = re.compile(r'^(\s+)?LIN(\s+){1}(?P<pointName>\w{1,24})(\s+)?$')
-        circCommonTemplate = re.compile(r'^(\s+)?CIRC(\s+){1}(?P<auxPoint>\w{1,24}),(\s+){1}(?P<pointName>\w{1,24})$(\s+)?')
-        ifTemplate=re.compile(r'^(\s+)?IF(\s+){1}(?P<exeCondition>.+)(\s+){1}THEN(\s+)?$')
-        endIfTemplate=re.compile(r'^(\s+)?ENDIF(\s+)?$')
+        try:
+            isObjectCreated = False  # флаг создания объекта
+            isVarIniStarted = False  # флаг начала инициализации переменных
+            varDictionary = dict()
+            varNameDictionary = dict()
+            text = self.codeEditor.toPlainText()
+            self.textEditScenario.selectAll()
+            strokes = text.split('\n')  # Получаем текст в виде списка строк
+            defTemplate = re.compile(
+                r'^(\s+)?DEF(\s+){1}(?P<objectName>\w{1,24})(\s+)?\((\s+)?(?P<objectParams>(.+)?)\)(\s+)?$')  # Шаблон для объявления объекта
+            declTemplate = re.compile(
+                r'^(\s+)?DECL(\s+){1}(?P<varType>(INT|REAL|BOOL|CHAR|POS))(\s+){1}(?P<varName>\w{1,24})(\s+)?$')  # Шаблон для объявления переменных
+            iniTemplate = re.compile(r'(\s+)?INI(\s+)?')  # Шаблон для начала инициализации переменных
+            varTemplate = re.compile(r'^(\s+)?(?P<varIni>\w{1,24})(\s+)?\=(\s+)?(?P<varValue>.+)(\s+)?$')
+            ptpCommonTemplate = re.compile(r'^(\s+)?PTP(\s+){1}(?P<pointName>\w{1,24})(\s+)?$')
+            linCommonTemplate = re.compile(r'^(\s+)?LIN(\s+){1}(?P<pointName>\w{1,24})(\s+)?$')
+            circCommonTemplate = re.compile(r'^(\s+)?CIRC(\s+){1}(?P<auxPoint>\w{1,24}),(\s+){1}(?P<pointName>\w{1,24})$(\s+)?')
+            ifTemplate=re.compile(r'^(\s+)?IF(\s+){1}(?P<exeCondition>.+)(\s+){1}THEN(\s+)?$')
+            endIfTemplate=re.compile(r'^(\s+)?ENDIF(\s+)?$')
 
-        file = open('coordinates.txt', 'w')
-        file.close()
-        for i in strokes:
-            defStroke = re.match(defTemplate, i)
-            declStroke = re.match(declTemplate, i)
-            varInit = re.match(varTemplate, i)
-            ptpCommonStroke = re.match(ptpCommonTemplate, i)
-            linCommonStroke = re.match(linCommonTemplate, i)
-            circCommonStroke = re.match(circCommonTemplate, i)
-            ifStroke=re.match(ifTemplate, i)
-            endIfStroke=re.match(endIfTemplate, i)
-            # print(defStroke)
-            # print(declStroke)
-            # print(varIni)
+            file = open('coordinates.txt', 'w')
+            file.close()
+            for i in strokes:
+                defStroke = re.match(defTemplate, i)
+                declStroke = re.match(declTemplate, i)
+                varInit = re.match(varTemplate, i)
+                ptpCommonStroke = re.match(ptpCommonTemplate, i)
+                linCommonStroke = re.match(linCommonTemplate, i)
+                circCommonStroke = re.match(circCommonTemplate, i)
+                ifStroke=re.match(ifTemplate, i)
+                endIfStroke=re.match(endIfTemplate, i)
+                # print(defStroke)
+                # print(declStroke)
+                # print(varIni)
 
-            if defStroke:
-                objectName = defStroke.group('objectName')
-                objectParams = defStroke.group('objectParams')
-                isObjectCreated = True
-            # else:
-            # print('Объект не создан')
-
-            if isObjectCreated:
-                # print('Объект создан')
-                if declStroke:
-                    # print('Вижу декларирование переменных')
-                    varType = declStroke.group('varType')
-                    varName = declStroke.group('varName')
-                    varDictionary[varName] = varType
+                if defStroke:
+                    objectName = defStroke.group('objectName')
+                    objectParams = defStroke.group('objectParams')
+                    isObjectCreated = True
                 # else:
-                # print('Переменные не были задекларированы')
+                # print('Объект не создан')
 
-                if iniTemplate:
-                    # print('Вижу начало инициализации переменных')
-                    isVarIniStarted = True
-                # else:
-                # print('Переменные не были инициализированны')
-                if isVarIniStarted:
-                    isIfStarted=False
-                    if varInit:
-                        #print(i)
-                        varId = varInit.group('varIni')
-                        varValue = varInit.group('varValue')
-                        #print(varId)
-                        #print(varValue)
-                        name = self.varCorrelator(varId, varValue, varDictionary)[0]
-                        value = self.varCorrelator(varId, varValue, varDictionary)[1]
-                        varNameDictionary[name] = value
-                if ptpCommonStroke:
-                    self.ptpStroke(ptpCommonStroke,varNameDictionary)
+                if isObjectCreated:
+                    # print('Объект создан')
+                    if declStroke:
+                        # print('Вижу декларирование переменных')
+                        varType = declStroke.group('varType')
+                        varName = declStroke.group('varName')
+                        varDictionary[varName] = varType
+                    # else:
+                    # print('Переменные не были задекларированы')
 
-                if linCommonStroke:
-                    self.linStroke(linCommonStroke,varNameDictionary)
-                if ifStroke:
-                    isIfStarted=True
-                    exeCondition=ifStroke.group('exeCondition')
-                    self.ifConditionDeterminer(exeCondition)
-                if endIfStroke:
-                    isIfStarted=False
+                    if iniTemplate:
+                        # print('Вижу начало инициализации переменных')
+                        isVarIniStarted = True
+                    # else:
+                    # print('Переменные не были инициализированны')
+                    if isVarIniStarted:
+                        isIfStarted=False
+                        if varInit:
+                            #print(i)
+                            varId = varInit.group('varIni')
+                            varValue = varInit.group('varValue')
+                            #print(varId)
+                            #print(varValue)
+                            name = self.varCorrelator(varId, varValue, varDictionary)[0]
+                            value = self.varCorrelator(varId, varValue, varDictionary)[1]
+                            varNameDictionary[name] = value
+                    if ptpCommonStroke:
+                        self.ptpStroke(ptpCommonStroke,varNameDictionary)
 
-        print('Словарь вне функции:', varNameDictionary)
-        self.logShower.setText('Compiled!')
+                    if linCommonStroke:
+                        self.linStroke(linCommonStroke,varNameDictionary)
+                    if ifStroke:
+                        isIfStarted=True
+                        exeCondition=ifStroke.group('exeCondition')
+                        self.ifConditionDeterminer(exeCondition)
+                    if endIfStroke:
+                        isIfStarted=False
+
+            print('Словарь вне функции:', varNameDictionary)
+            self.logShower.setText('Compiled!')
+        except:
+            self.logShower.setText('Compilation error!')
 
     def ifConditionDeterminer(self, exeCondition):
         #print ('Условие: ', exeCondition)
@@ -848,6 +858,7 @@ END''')  # Назначаем стартовый текст
                 #alphaAngle=round(math.degrees(math.sin(0)), 2)
                 #gammaAngle=round(math.degrees(math.atan2(-r12, -r11)), 2)
                 #print('Углы Эйлера (r33=-1):', alphaAngle, bettaAngle, gammaAngle)
+
     def ptpStroke(self, ptpCommonStroke, varNameDictionary):
         pointName = ptpCommonStroke.group('pointName')
         motionType = 'PTP'
