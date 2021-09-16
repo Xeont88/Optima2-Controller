@@ -776,19 +776,22 @@
       <string>KRL</string>
      </attribute>
      <widget class="QFrame" name="frame">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>9</x>
         <y>9</y>
         <width>591</width>
-        <height>331</height>
+        <height>321</height>
        </rect>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+       <enum>QFrame::Plain</enum>
       </property>
       <widget class="QWidget" name="layoutWidget_2">
        <property name="geometry">
@@ -801,108 +804,11 @@
        </property>
        <layout class="QVBoxLayout" name="generalContainer">
         <item>
-         <layout class="QHBoxLayout" name="menuContainer">
+         <layout class="QVBoxLayout" name="bodyContainer">
           <property name="leftMargin">
            <number>5</number>
           </property>
           <property name="topMargin">
-           <number>5</number>
-          </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLineEdit" name="adressLine">
-            <property name="font">
-             <font>
-              <family>MS Shell Dlg 2</family>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLineEdit {
-background-color: #cccccc;
-color: black;
-}</string>
-            </property>
-            <property name="text">
-             <string>SASASA</string>
-            </property>
-            <property name="maxLength">
-             <number>80</number>
-            </property>
-            <property name="frame">
-             <bool>true</bool>
-            </property>
-            <property name="cursorPosition">
-             <number>6</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="saveBtn">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
-background-color:#cccccc;
-color:orange;
-}</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../../KRL/krlParser/KRLparser/form_Images/background.qrc">
-              <normaloff>:/newPrefix/icons8-save-as-96.png</normaloff>:/newPrefix/icons8-save-as-96.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="autoDefault">
-             <bool>false</bool>
-            </property>
-            <property name="default">
-             <bool>false</bool>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="compileBtn">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
-background-color:#cccccc;
-color:orange;
-}</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normalon>:/newPrefix/icons8-code-80.png</normalon>
-             </iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="bodyContainer">
-          <property name="leftMargin">
            <number>5</number>
           </property>
           <property name="rightMargin">
@@ -1200,21 +1106,24 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="logo">
-              <property name="maximumSize">
-               <size>
-                <width>50</width>
-                <height>50</height>
-               </size>
+             <widget class="QPushButton" name="compileBtn">
+              <property name="styleSheet">
+               <string notr="true">background-color:#cccccc;
+color:orange;
+</string>
               </property>
               <property name="text">
                <string/>
               </property>
-              <property name="pixmap">
-               <pixmap resource="../../KRL/krlParser/KRLparser/form_Images/background.qrc">:/newPrefix/icon_1.png</pixmap>
+              <property name="icon">
+               <iconset resource="resource.qrc">
+                <normaloff>:/Optima2/code.png</normaloff>:/Optima2/code.png</iconset>
               </property>
-              <property name="scaledContents">
-               <bool>true</bool>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
               </property>
              </widget>
             </item>
@@ -1516,7 +1425,7 @@ color: black;
     <addaction name="action_open_KRL"/>
     <addaction name="action_save_KRL"/>
     <addaction name="separator"/>
-    <addaction name="open_file_button"/>
+    <addaction name="action_open_scen"/>
     <addaction name="action_save_scen"/>
     <addaction name="action_3"/>
     <addaction name="separator"/>
@@ -1525,7 +1434,7 @@ color: black;
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="open_file_button">
+  <action name="action_open_scen">
    <property name="enabled">
     <bool>true</bool>
    </property>

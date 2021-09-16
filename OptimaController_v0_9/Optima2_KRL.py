@@ -1,4 +1,4 @@
-import design_v0_9b
+import design_v0_9c
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
 import os
@@ -26,7 +26,7 @@ delimit = ' '
 point_delay = 0.08
 
 
-class Example(QMainWindow, design_v0_9b.Ui_MainWindow, Gamepad):
+class Example(QMainWindow, design_v0_9c.Ui_MainWindow, Gamepad):
     '''
     Главный класс приложения.
     Работа GUI.
@@ -49,7 +49,12 @@ class Example(QMainWindow, design_v0_9b.Ui_MainWindow, Gamepad):
         self.refreshCOMbutton.setToolTip("Обновить список СОМ-портов")
         self.connectButton.setToolTip("Подключиться к роботу")
         self.ejectButton.setToolTip("Отключить соединение")
-        self.open_file_button.triggered.connect(self.open_scenario_file)
+        self.compileBtn.setToolTip("Скомпилировать KRL код")
+
+        self.action_open_scen.triggered.connect(self.open_scenario_file)
+        self.action_open_KRL.triggered.connect(self.open_KRL_file)
+        self.action_save_KRL.triggered.connect(self.save_KRL_file)
+        self.action_save_scen.triggered.connect(self.save_scenario_file)
         reply = QMessageBox.question(self, 'Внимание!',
                                      'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
@@ -104,12 +109,12 @@ class Example(QMainWindow, design_v0_9b.Ui_MainWindow, Gamepad):
         self.home_button.clicked.connect(self.go_home)
 
         # KRL
-        self.adressLine.setText('myProgram.txt')  # Указывание название файла
+        # self.adressLine.setText('myProgram.krl')  # Указывание название файла
         self.codeEditor.setPlainText('''DEF my_program()
 
 DECL POS HOME
 INI
-HOME = {A1 0, A2 0, A3 90, A4 0, A5 0}
+HOME = {A1 0, A2 0, A3 0, A4 0, A5 0}
 
 PTP HOME
 
@@ -117,14 +122,14 @@ PTP HOME
 
 END''')  # Назначаем стартовый текст
         self.compileBtn.clicked.connect(self.parser)  # Если нажали "compile", то начинаем парсить
-        self.saveBtn.clicked.connect(
-            self.codeSaver)  # Если нажали "save", то сохраняем код в файл с указанным в адресной строке именем
+        # self.saveBtn.clicked.connect(
+        #     self.KRL_file_saver)  # Если нажали "save", то сохраняем код в файл с указанным в адресной строке именем
 
 
     def open_scenario_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QFileDialog.getOpenFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
-                                  "/data/highlighted_file.txt", filter="Text Files (*.txt)")
+                                  "/data/", filter="Text Files (*.scn);; All Files (*.*)")
 
         print(fname)
         try:
@@ -136,7 +141,69 @@ END''')  # Назначаем стартовый текст
             print(data)
             self.textEditScenario.selectAll()
             self.textEditScenario.setText(data)
+            f.close()
         except:
+            pass
+
+
+    def save_scenario_file(self):
+        # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        fname = QFileDialog.getSaveFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
+                                  "/data/", filter="Text Files (*.scn);; All Files (*.*)")
+
+        print(fname)
+        try:
+            # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
+            print('open')
+            f = open(fname[0], 'w')
+            # with f:
+            # self.textEditScenario.selectAll()
+            data = self.textEditScenario.getText()
+            f.write(data)
+            # print(data)
+            f.close()
+        except:
+            print('.scn file not saved')
+            pass
+
+    def save_KRL_file(self):
+        # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        fname = QFileDialog.getSaveFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
+                                  "/data/myProgram", filter="Text Files (*.krl);; All Files (*.*)")
+
+        print(fname)
+        try:
+            # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
+            print('open to save')
+            f = open(fname[0], 'w')
+            # with f:
+            # self.textEditScenario.selectAll()
+            data = self.codeEditor.toPlainText()
+            print(data)
+            f.write(data)
+            f.close()
+        except:
+            print('.krl file not saved')
+            pass
+
+
+    def open_KRL_file(self):
+        # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+        fname = QFileDialog.getOpenFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
+                                  "/data/", filter="Text Files (*.krl);; All Files (*.*)")
+
+        # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
+        print('open')
+        try:
+            f = open(fname[0], 'r')
+            # with f:
+            data = f.read()
+            print(fname)
+            print(data)
+            self.codeEditor.setPlainText(data)
+            f.close()
+        except:
+            print('KRL not opened')
             pass
 
     def go_home(self):
@@ -587,6 +654,11 @@ END''')  # Назначаем стартовый текст
         print('scenario started')
 
     def finding_longest_way(self, last_axes, new_axes):
+        '''
+        Поиск самого долгово пути, который пройдет каждый из сервоприводов.
+        last_axes: последняя координата(осей)
+        new_axes: новая координата (осей)
+        '''
         longest_way = 0
         i = 0
         for axis in new_axes[:-1]:
@@ -636,23 +708,42 @@ END''')  # Назначаем стартовый текст
     # KRL part of code
 
     # Функция-слот сохранения кода
-    def codeSaver(self):
+    def KRL_file_saver(self):
         fileName = self.adressLine.text()  # считываем имя файла с адресной строки
         text = self.codeEditor.toPlainText()  # считываем код с текстового входа
-        #print('Имя файла: ', fileName)
-        #print('Текст файла:, ', text)
-        adressTemplate = re.compile(r'^\w+\.txt')  # шаблон адресной строки
+        # print('Имя файла: ', fileName)
+        # print('Текст файла:, ', text)
+        adressTemplate = re.compile(r'^\w+\.krl')  # шаблон адресной строки
         adressStroke = re.match(adressTemplate, fileName)  # совпадение шаблону адресной строки
         if adressStroke:  # если совпало
-            code = open(fileName, 'w') #сохраняем файл
+            code = open(fileName, 'w')  # сохраняем файл
             code.write(text)
             code.close()
             logStroke = 'File ' + fileName + ' is saved'
-            self.logShower.setText(logStroke) # выводим сообщения о сохранении файла
+            self.logShower.setText(logStroke)  # выводим сообщения о сохранении файла
             self.repaint()
         else:  # если не совпало
             logStroke = 'File type error: check file type'
-            self.logShower.setText(logStroke)    # выводим сообщение о не совпадении имени или типа фйла
+            self.logShower.setText(logStroke)  # выводим сообщение о не совпадении имени или типа фйла
+            self.logShower.repaint()
+
+    def scenario_file_saver(self):
+        fileName = self.adressLine.text()  # считываем имя файла с адресной строки
+        text = self.codeEditor.toPlainText()  # считываем код с текстового входа
+        # print('Имя файла: ', fileName)
+        # print('Текст файла:, ', text)
+        adressTemplate = re.compile(r'^\w+\.krl')  # шаблон адресной строки
+        adressStroke = re.match(adressTemplate, fileName)  # совпадение шаблону адресной строки
+        if adressStroke:  # если совпало
+            code = open(fileName, 'w')  # сохраняем файл
+            code.write(text)
+            code.close()
+            logStroke = 'File ' + fileName + ' is saved'
+            self.logShower.setText(logStroke)  # выводим сообщения о сохранении файла
+            self.repaint()
+        else:  # если не совпало
+            logStroke = 'File type error: check file type'
+            self.logShower.setText(logStroke)  # выводим сообщение о не совпадении имени или типа фйла
             self.logShower.repaint()
 
     def parser(self):
