@@ -246,7 +246,9 @@ END''')  # Назначаем стартовый текст
         rx = self.serial.readLine()
         rxs = str(rx, 'utf-8').strip()
         data = rxs.split(' ')
-        print(data)
+        print('Robot answer >', data[0])
+        if data[0] == 'Ok':
+            self.robot_moving = False
 
     def on_open2(self):
         self.serial.setPortName(self.comboBox.currentText())
@@ -646,6 +648,7 @@ END''')  # Назначаем стартовый текст
         if sending_data[-1] == ' ':
             sending_data = sending_data[:-1]
 
+        self.robot_moving = True
         self.serial_send(sending_data)
 
     def scenario_thread(self):
@@ -694,7 +697,11 @@ END''')  # Назначаем стартовый текст
             # serial.setPortName(ui.comboBox.currentText())
             self.move_in_point(line)
             # serial.update()
-            sleep(delay*point_delay)
+
+            # sleep(delay*point_delay)
+            while self.robot_moving:
+                sleep(0.01)
+
             i += 1
             print('end of line', i)
             # timer = threading.Timer(3, lambda: move_in_point(line))
