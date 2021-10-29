@@ -68,10 +68,14 @@ class CardDetection:
             rec = cv2.rectangle(image, (value[0], value[1]), (value[2], value[3]),
                                 (255, 255, 0), 2)
             cv2.putText(rec, key, (value[0], value[1] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 0, 12), 1)
-            print(key)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 3)
+            # print(key)
         cv2.imshow('Press "Esc" button, for exit', image)
         # cv2.waitKey(0)
+        try:
+            return key
+        except:
+            pass
 
 
 def main(img, cd):

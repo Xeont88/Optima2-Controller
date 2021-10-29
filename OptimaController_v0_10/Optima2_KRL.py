@@ -1,4 +1,4 @@
-import design_v0_10
+import design_v0_11
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
 import os, signal, subprocess
@@ -7,6 +7,9 @@ from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt5.QtCore import QIODevice, QObject, pyqtSignal, pyqtSlot, QThread
 from time import sleep
 from gamepad_class import *
+from CardDetection import CardDetection as CD
+import cv2
+
 
 # KRL
 import re
@@ -26,7 +29,7 @@ delimit = ' '
 point_delay = 0.08
 
 
-class Example(QMainWindow, design_v0_10.Ui_MainWindow, Gamepad):
+class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
     '''
     Главный класс приложения.
     Работа GUI.
@@ -37,6 +40,7 @@ class Example(QMainWindow, design_v0_10.Ui_MainWindow, Gamepad):
     portList = []
     portListDescription = ['Выберите устройство']
     send_data = 0
+    MV_script_flag = False
 
     def __init__(self, ):
         super().__init__()
@@ -127,62 +131,96 @@ END''')  # Назначаем стартовый текст
         # self.saveBtn.clicked.connect(
         #     self.KRL_file_saver)  # Если нажали "save", то сохраняем код в файл с указанным в адресной строке именем
 
-        self.machine_vision_UI()
+        print(self.tableWidget.columnWidth(2))
+        self.tableWidget.setColumnWidth(0, 220)
+        self.tableWidget.setColumnWidth(1, 220)
+        self.tableWidget.setColumnWidth(2, 107)
+
 
     def stop_MV_script(self):
-        # os.system('')
-        # os.kill()
-        self.process.send_signal(signal.SIGINT)
-
+        self.MV_script_flag = False
+        sleep(0.5)
+        self.cap.release()
+        cv2.waitKey(1)
+        cv2.destroyAllWindows()
 
     def start_MV_script(self):
-        # python detect_video.py --weights ./checkpoints/yolov4-tiny-416 --size 416 --model yolov4 --video 0 --output ./detections/results.avi
-        #
-        path_to_yolo_dir = "C:\\Users\sonkin_rr\Desktop\Прожектс\Python\OpenCV\yolov4-custom-functions\\"
-        command = 'python ' + path_to_yolo_dir + self.MV_script_dict[self.script_comboBox.currentText()] + \
-            ' --weights ' + self.weights_dict[self.weight_comboBox.currentText()] + \
-            ' --size ' + self.video_size_dict[self.vid_size_comboBox.currentText()] + \
-            ' --model yolov4 ' + \
-            ' --video ' + self.camID_comboBox.currentText() + \
-            ' --output ' + self.outout_video_name_edit.text() + \
-            ' --tiny'
+        self.MV_script_flag = True
+        MV_thread = threading.Thread(target=self.MV_script)
+        MV_thread.start()
+        # ui.connectLabel.setText('Подключено')
 
-        make_dir = 'mkdir hello'
-        print('command=', 'cd '+path_to_yolo_dir+'\n'+make_dir)
-        # os.system('cd '+path_to_yolo_dir+'\n\r')
-        # os.system(make_dir)
-        os.chdir(path_to_yolo_dir)
-        # os.system(command)
-        # c_command = open(command, 'w')
-        self.process = subprocess.Popen(command,  shell=True)
+    def scenario_file_thread(self, scen):
+        self.sc_file_thread = threading.Thread(target=lambda : self.start_scenario_from_file(scen))
+        self.sc_file_thread.start()
+        print('scenario started')
 
-    # настроить страницу тех.зрения
-    def machine_vision_UI(self):
-        # Examples:
-        #  python save_model.py --weights ./data/yolov4.weights --output ./checkpoints/yolov4-416 --input_size 416 --model yolov4
+    def check_MV_event_list(self, key):
+        # print('in da ya4eyka ', self.tableWidget.item(0, 1).text())
+        for row in range(self.tableWidget.rowCount()):
+            if self.tableWidget.item(row, 1):
+                item = self.tableWidget.item(row, 1).text()
+                if item == key and not self.send_data:
+                    scen = self.tableWidget.item(row, 0).text()
+                    print(scen)
+                    self.scenario_file_thread(scen)
 
-        # Run yolov4 on video
-        # python detect_video.py --weights ./checkpoints/yolov4 -416 --size 416 --model yolov4 --video ./data/video/video.mp4 --output ./detections/results.avi
 
-        # Run yolov4 on webcam
-        # python detect_video.py --weights ./checkpoints/yolov4-416 --size 416 --model yolov4 --video 0 --output ./detections/results.avi
-        self.MV_script_dict = {'Сохранить модель':'save_model.py',
-                               'Найти на фото':'detect.py',
-                               'Найти на видео':'detect_video.py'}
-        self.script_comboBox.addItems(self.MV_script_dict)
-        self.script_comboBox.setCurrentIndex(2)
+    def start_scenario_from_file(self, file_name):
+        self.send_data = 1
+        print('start_scenario_from_file')
+        data = ''
+        try:
+            # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
+            print('open')
+            f = open(file_name, 'r')
+            # with f:
+            data = f.read()
+            print(data)
+            f.close()
+        except:
+            print('ошибка чтения файла сценария.')
 
-        self.weights_dict = {'YoloV4':'./checkpoints/yolov4-tiny-416'}
-        self.weight_comboBox.addItems(self.weights_dict)
-        self.weight_comboBox.setCurrentIndex(0)
 
-        self.video_size_dict = {'416':'416'}
-        self.vid_size_comboBox.addItems(self.video_size_dict)
-        self.vid_size_comboBox.setCurrentIndex(0)
+        t = data.split('\n')
+        last_axes = self.axis_list
+        i = 0
+        for line in t[:-1]:
+            line = line.split(delimit)
+            print('line', line)
+            delay = self.finding_longest_way(last_axes, line)
+            last_axes = line
+            self.move_in_point(line)
+            while self.robot_moving:            # ждем пока робот не достигнет новой позиции всеми осями
+                sleep(0.01)
+            i += 1
+            print('end of line', i)
+        self.send_data = 0
+        print('scenario over')
 
-        self.camID_list = ['-1', '0', '1', '2']
-        self.camID_comboBox.addItems(self.camID_list)
-        self.camID_comboBox.setCurrentIndex(1)
+    def MV_script(self):
+        self.cap = cv2.VideoCapture(0)
+
+        # TODO: открытие окна видео, при повторном запуске.
+        while self.MV_script_flag:
+            try:
+                flag, img = self.cap.read()
+                gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                cnts = self.find_countours_of_cards(gray_img)
+                card_location = self.find_coordinates_of_cards(cnts, gray_img)
+                key = self.draw_rectangle_aroudn_cards(card_location, img)
+                print(key)
+                if key:
+                    self.check_MV_event_list(key)
+
+            except:
+                self.cap.release()
+                raise
+            ch = cv2.waitKey(5)
+            if ch == 27:
+                cv2.destroyAllWindows()
+                self.MV_script_flag = False
+                break
 
     def open_scenario_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
@@ -735,8 +773,6 @@ END''')  # Назначаем стартовый текст
         text = self.textEditScenario.toPlainText()
         print(text)
         t = text.split('\n')
-        # print(t)
-        # serial.close()
         last_axes = self.axis_list
         i = 0
         for line in t[:-1]:
@@ -1153,7 +1189,7 @@ END''')  # Назначаем стартовый текст
 def main():
     app = QApplication(sys.argv)  # Новый экземпляр QApplication
     app.setStyle('Fusion')
-    window = Example()  # Создаём объект класса ExampleApp
+    window = Optima2Controller()  # Создаём объект класса ExampleApp
     window.setWindowTitle("Optima-2 Controller")
     window.setWindowIcon(QIcon('src/zarnitza64g.ico'))
     window.show()  # Показываем окно
