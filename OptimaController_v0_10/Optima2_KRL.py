@@ -55,6 +55,12 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.ejectButton.setToolTip("Отключить соединение")
         self.compileBtn.setToolTip("Скомпилировать KRL код")
 
+        self.photo_cam_button.setToolTip("Создать фото объекта")
+        self.create_picture_button.setToolTip("Сделать снимок")
+        self.MV_mode_combobox.setToolTip("Режимы работы Тех Зрения")
+        self.play_button_vision.setToolTip("Запустить работу Тех Зрения")
+        self.stop_button_vision.setToolTip("Остановить работу Тех Зрения")
+
         self.action_open_scen.triggered.connect(self.open_scenario_file)
         self.action_open_KRL.triggered.connect(self.open_KRL_file)
         self.action_save_KRL.triggered.connect(self.save_KRL_file)
@@ -104,6 +110,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
 
 
         self.my_thread = threading.Thread(target=self.gamepad_thread)
+        self.my_thread.daemon = True
         self.my_thread.start()
 
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
@@ -138,30 +145,44 @@ END''')  # Назначаем стартовый текст
 
 
     def stop_MV_script(self):
-        self.MV_script_flag = False
-        sleep(0.5)
-        self.cap.release()
-        cv2.waitKey(1)
-        cv2.destroyAllWindows()
+        while self.flag:
+            sleep(0.001)
+        try:
+            # ch = cv2.waitKey(5)
+            # if ch == 27:
+            # self.cap.release()
+            cv2.destroyAllWindows()
+            self.MV_script_flag = False
+        except:
+            raise
 
     def start_MV_script(self):
         self.MV_script_flag = True
         MV_thread = threading.Thread(target=self.MV_script)
+        MV_thread.daemon = True
         MV_thread.start()
         # ui.connectLabel.setText('Подключено')
 
     def scenario_file_thread(self, scen):
         self.sc_file_thread = threading.Thread(target=lambda : self.start_scenario_from_file(scen))
+        self.sc_file_thread.daemon = True
         self.sc_file_thread.start()
         print('scenario started')
 
     def check_MV_event_list(self, key):
+        '''
+        Проверяется таблица на наличие искомого объекта(-ов),
+        в случае успеха - запускается соответствующий сценарий
+        :param key: имя файла фото.
+        '''
         # print('in da ya4eyka ', self.tableWidget.item(0, 1).text())
         for row in range(self.tableWidget.rowCount()):
             if self.tableWidget.item(row, 1):
                 item = self.tableWidget.item(row, 1).text()
                 if item == key and not self.send_data:
                     scen = self.tableWidget.item(row, 0).text()
+                    if scen[-4:] != '.scn':
+                        scen += '.scn'
                     print(scen)
                     self.scenario_file_thread(scen)
 
@@ -204,6 +225,7 @@ END''')  # Назначаем стартовый текст
         # TODO: открытие окна видео, при повторном запуске.
         while self.MV_script_flag:
             try:
+                self.flag = True
                 flag, img = self.cap.read()
                 gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 cnts = self.find_countours_of_cards(gray_img)
@@ -212,12 +234,13 @@ END''')  # Назначаем стартовый текст
                 print(key)
                 if key:
                     self.check_MV_event_list(key)
-
+                self.flag = False
             except:
                 self.cap.release()
                 raise
-            ch = cv2.waitKey(5)
+            ch = cv2.waitKey(50)
             if ch == 27:
+                self.cap.release()
                 cv2.destroyAllWindows()
                 self.MV_script_flag = False
                 break
@@ -225,7 +248,7 @@ END''')  # Назначаем стартовый текст
     def open_scenario_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QFileDialog.getOpenFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
-                                  "/data/", filter="Text Files (*.scn);; All Files (*.*)")
+                                            "/data/", filter="Text Files (*.scn);; All Files (*.*)")
 
         print(fname)
         try:
@@ -244,7 +267,7 @@ END''')  # Назначаем стартовый текст
     def save_scenario_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QFileDialog.getSaveFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
-                                  "/data/", filter="Text Files (*.scn);; All Files (*.*)")
+                                            "/data/", filter="Text Files (*.scn);; All Files (*.*)")
 
         print(fname)
         try:
@@ -264,7 +287,7 @@ END''')  # Назначаем стартовый текст
     def save_KRL_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QFileDialog.getSaveFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
-                                  "/data/myProgram", filter="Text Files (*.krl);; All Files (*.*)")
+                                            "/data/myProgram", filter="Text Files (*.krl);; All Files (*.*)")
 
         print(fname)
         try:
@@ -284,7 +307,7 @@ END''')  # Назначаем стартовый текст
     def open_KRL_file(self):
         # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QFileDialog.getOpenFileName(self, "Choose a path and filename", os.getcwd().replace("\\", "/") +
-                                  "/data/", filter="Text Files (*.krl);; All Files (*.*)")
+                                            "/data/", filter="Text Files (*.krl);; All Files (*.*)")
 
         # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
         print('open')
@@ -359,6 +382,7 @@ END''')  # Назначаем стартовый текст
 
     def on_open1(self):
         my_thread = threading.Thread(target=self.on_open2)
+        my_thread.daemon = True
         my_thread.start()
         # ui.connectLabel.setText('Подключено')
 
@@ -410,7 +434,7 @@ END''')  # Назначаем стартовый текст
         gripper = (self.lineEdit_7.text())
         carousel = (self.lineEdit_8.text())
 
-        text = ax1 + delimit + ax2 + delimit + ax3 + delimit + ax4 + delimit + ax5 + delimit\
+        text = ax1 + delimit + ax2 + delimit + ax3 + delimit + ax4 + delimit + ax5 + delimit \
                + ax6 + delimit + gripper + delimit + carousel + '\n'
         print('add scenario point', text)
         self.textEditScenario.insertPlainText(text)
@@ -719,7 +743,7 @@ END''')  # Назначаем стартовый текст
                 if info.dwButtons:
                     # print("buttons: ", btns)
                     self.binding_sticks(x=[0, 0], y=[0, 0], z=[btns[0], btns[2], btns[1], btns[3]],
-                                   table=[btns[6], btns[7]], axis_6=[btns[5],btns[4]])
+                                        table=[btns[6], btns[7]], axis_6=[btns[5],btns[4]])
 
                 if any([abs(v) > 10 for v in axisXYZ]):
                     # print("axis:", axisXYZ)
@@ -747,6 +771,7 @@ END''')  # Назначаем стартовый текст
 
     def scenario_thread(self):
         self.sc_thread = threading.Thread(target=self.start_scenario)
+        self.sc_thread.daemon = True
         self.sc_thread.start()
         print('scenario started')
 
@@ -982,24 +1007,24 @@ END''')  # Назначаем стартовый текст
 
         for i in range (0,5):
             #if i!=2 and i != 3:
-                rzdi=np.matmul(rzList[i], diList[i])
-                #print('Первая матрица:', rzdi)
-                rzdiai=np.matmul(rzdi, axList[i])
-                #print('Вторая матрица:',rzdiai)
-                h=np.matmul(rzdiai, rxList[i])
-                #print('Итоговая матрица:',h)
-                hList.append(h)
-            #else:
-                #if i == 2:
-                #    rzdi = np.matmul(rzList[i], diList[i])
-                #    rzdiai = np.matmul(rzdi, axList[i])
-                #    h = np.matmul(rzdiai, ryList[i])
-                #    hList.append(h)
-               # if i == 3:
-                  #  rzdi=np.matmul(rzList[i], diList[i])
-                 #   rzdiai=np.matmul(rzdi, ayList[i])
-                  #  h = np.matmul(rzdiai, rxList[i])
-                    #hList.append(h)
+            rzdi=np.matmul(rzList[i], diList[i])
+            #print('Первая матрица:', rzdi)
+            rzdiai=np.matmul(rzdi, axList[i])
+            #print('Вторая матрица:',rzdiai)
+            h=np.matmul(rzdiai, rxList[i])
+            #print('Итоговая матрица:',h)
+            hList.append(h)
+        #else:
+        #if i == 2:
+        #    rzdi = np.matmul(rzList[i], diList[i])
+        #    rzdiai = np.matmul(rzdi, axList[i])
+        #    h = np.matmul(rzdiai, ryList[i])
+        #    hList.append(h)
+        # if i == 3:
+        #  rzdi=np.matmul(rzList[i], diList[i])
+        #   rzdiai=np.matmul(rzdi, ayList[i])
+        #  h = np.matmul(rzdiai, rxList[i])
+        #hList.append(h)
         print('Список итоговых матриц: ', hList)
         unitMatrix=np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
         hTotal=np.matmul(unitMatrix, hList[0])
@@ -1038,16 +1063,16 @@ END''')  # Назначаем стартовый текст
             difGammaAlpha=round(math.degrees(-math.atan2(r13, r23)), 2)
             print('Разность гаммы и альфы (r31=-1): ', difGammaAlpha)
         #else:
-            #if r31!=0:
-                #bettaAngle=round(math.degrees(math.cos(r33)), 2)
-                #alphaAngle=round(math.degrees(math.sin(0)), 2)
-                #gammaAngle=round(math.degrees(math.atan2(r21, r11)), 2)
-                #print('Углы Эйлера (r31!=0):', alphaAngle, bettaAngle, gammaAngle)
-            #else:
-                #bettaAngle=round(math.degrees(math.cos(r33)), 2)
-                #alphaAngle=round(math.degrees(math.sin(0)), 2)
-                #gammaAngle=round(math.degrees(math.atan2(-r12, -r11)), 2)
-                #print('Углы Эйлера (r33=-1):', alphaAngle, bettaAngle, gammaAngle)
+        #if r31!=0:
+        #bettaAngle=round(math.degrees(math.cos(r33)), 2)
+        #alphaAngle=round(math.degrees(math.sin(0)), 2)
+        #gammaAngle=round(math.degrees(math.atan2(r21, r11)), 2)
+        #print('Углы Эйлера (r31!=0):', alphaAngle, bettaAngle, gammaAngle)
+        #else:
+        #bettaAngle=round(math.degrees(math.cos(r33)), 2)
+        #alphaAngle=round(math.degrees(math.sin(0)), 2)
+        #gammaAngle=round(math.degrees(math.atan2(-r12, -r11)), 2)
+        #print('Углы Эйлера (r33=-1):', alphaAngle, bettaAngle, gammaAngle)
 
     def ptpStroke(self, ptpCommonStroke, varNameDictionary):
         pointName = ptpCommonStroke.group('pointName')
