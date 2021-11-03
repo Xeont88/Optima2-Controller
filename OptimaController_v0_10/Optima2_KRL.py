@@ -1,6 +1,6 @@
 import design_v0_11
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem
 import os, signal, subprocess
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
@@ -9,7 +9,7 @@ from time import sleep
 from gamepad_class import *
 from CardDetection import CardDetection as CD
 import cv2
-
+import MakePhoto
 
 # KRL
 import re
@@ -25,8 +25,8 @@ import time
 import ctypes
 
 # разделитель между значениями осей, в сценариях
-delimit = ' '
-point_delay = 0.08
+DELIMIT = ' '
+POINT_DELAY = 0.08
 
 
 class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
@@ -42,10 +42,39 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
     send_data = 0
     MV_script_flag = False
 
+    scen_row = 0
+
     def __init__(self, ):
         super().__init__()
         self.gamepad_init()
         self.setupUi(self)
+
+        reply = QMessageBox.question(self, 'Внимание!',
+                                     'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
+                                     QMessageBox.Ok | QMessageBox.Ok)   # QMessageBox.Cancel,
+
+        self.toolTips()
+        self.setup_connections()
+
+        # Gamepad thread settings
+        self.my_thread = threading.Thread(target=self.gamepad_thread)
+        self.my_thread.daemon = True
+        self.my_thread.start()
+
+        # KRL
+        with open('src/krl_txt') as f:
+            t = f.read()
+        self.codeEditor.setPlainText(t)  # Назначаем стартовый текст
+
+        print(self.tableWidget.columnWidth(2))
+        self.tableWidget.setColumnWidth(0, 220)
+        self.tableWidget.setColumnWidth(1, 220)
+        self.tableWidget.setColumnWidth(2, 107)
+
+        MV_modes = ['Matches', 'Colors']
+        self.MV_mode_combobox.addItems(MV_modes)
+
+    def toolTips(self):
         self.home_button.setToolTip("Установить оси в исходное положение")
         self.comboBox.setToolTip("Список СОМ-портов")
         self.play_button.setToolTip("Запустить программу")
@@ -61,13 +90,13 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.play_button_vision.setToolTip("Запустить работу Тех Зрения")
         self.stop_button_vision.setToolTip("Остановить работу Тех Зрения")
 
+    def setup_connections(self):
+
         self.action_open_scen.triggered.connect(self.open_scenario_file)
         self.action_open_KRL.triggered.connect(self.open_KRL_file)
         self.action_save_KRL.triggered.connect(self.save_KRL_file)
         self.action_save_scen.triggered.connect(self.save_scenario_file)
-        reply = QMessageBox.question(self, 'Внимание!',
-                                     'Для использования геймпада подключите его к компьютеру, \nи нажмите кнопку "OK"',
-                                     QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+
         # Serial connections
         self.serial_init()
         self.serial.readyRead.connect(self.on_read)
@@ -108,11 +137,6 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.pushButton_7.clicked.connect(self.servo_set_func)
         self.lineEdit_7.returnPressed.connect(self.servo_set_func)
 
-
-        self.my_thread = threading.Thread(target=self.gamepad_thread)
-        self.my_thread.daemon = True
-        self.my_thread.start()
-
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
         self.plus_button.clicked.connect(self.add_point_in_scenario)
         self.startScenarioButton.clicked.connect(self.scenario_thread)
@@ -120,28 +144,9 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.home_button.clicked.connect(self.go_home)
         self.play_button_vision.clicked.connect(self.start_MV_script)
         self.stop_button_vision.clicked.connect(self.stop_MV_script)
+        self.photo_cam_button.clicked.connect(MakePhoto.make_photo)
 
-        # KRL
-        # self.adressLine.setText('myProgram.krl')  # Указывание название файла
-        self.codeEditor.setPlainText('''DEF my_program()
-
-DECL POS HOME
-INI
-HOME = {A1 0, A2 0, A3 0, A4 0, A5 0}
-
-PTP HOME
-
-PTP HOME
-
-END''')  # Назначаем стартовый текст
         self.compileBtn.clicked.connect(self.parser)  # Если нажали "compile", то начинаем парсить
-        # self.saveBtn.clicked.connect(
-        #     self.KRL_file_saver)  # Если нажали "save", то сохраняем код в файл с указанным в адресной строке именем
-
-        print(self.tableWidget.columnWidth(2))
-        self.tableWidget.setColumnWidth(0, 220)
-        self.tableWidget.setColumnWidth(1, 220)
-        self.tableWidget.setColumnWidth(2, 107)
 
 
     def stop_MV_script(self):
@@ -153,6 +158,7 @@ END''')  # Назначаем стартовый текст
             # self.cap.release()
             cv2.destroyAllWindows()
             self.MV_script_flag = False
+            self.MV_status_label.setText('Нет действия')
         except:
             raise
 
@@ -164,6 +170,7 @@ END''')  # Назначаем стартовый текст
         # ui.connectLabel.setText('Подключено')
 
     def scenario_file_thread(self, scen):
+        self.tableWidget.setItem(self.scen_row, 2, QTableWidgetItem('В процессе'))
         self.sc_file_thread = threading.Thread(target=lambda : self.start_scenario_from_file(scen))
         self.sc_file_thread.daemon = True
         self.sc_file_thread.start()
@@ -175,6 +182,7 @@ END''')  # Назначаем стартовый текст
         в случае успеха - запускается соответствующий сценарий
         :param key: имя файла фото.
         '''
+        print('check_MV_event_list')
         # print('in da ya4eyka ', self.tableWidget.item(0, 1).text())
         for row in range(self.tableWidget.rowCount()):
             if self.tableWidget.item(row, 1):
@@ -185,7 +193,7 @@ END''')  # Назначаем стартовый текст
                         scen += '.scn'
                     print(scen)
                     self.scenario_file_thread(scen)
-
+                    self.scen_row = row
 
     def start_scenario_from_file(self, file_name):
         self.send_data = 1
@@ -207,7 +215,7 @@ END''')  # Назначаем стартовый текст
         last_axes = self.axis_list
         i = 0
         for line in t[:-1]:
-            line = line.split(delimit)
+            line = line.split(DELIMIT)
             print('line', line)
             delay = self.finding_longest_way(last_axes, line)
             last_axes = line
@@ -217,11 +225,13 @@ END''')  # Назначаем стартовый текст
             i += 1
             print('end of line', i)
         self.send_data = 0
+        self.tableWidget.setItem(self.scen_row, 2, QTableWidgetItem(''))
+        self.tableWidget.setItem(self.scen_row, 2, QTableWidgetItem(''))
         print('scenario over')
 
     def MV_script(self):
         self.cap = cv2.VideoCapture(0)
-
+        self.MV_status_label.setText('В работе')
         # TODO: открытие окна видео, при повторном запуске.
         while self.MV_script_flag:
             try:
@@ -434,8 +444,8 @@ END''')  # Назначаем стартовый текст
         gripper = (self.lineEdit_7.text())
         carousel = (self.lineEdit_8.text())
 
-        text = ax1 + delimit + ax2 + delimit + ax3 + delimit + ax4 + delimit + ax5 + delimit \
-               + ax6 + delimit + gripper + delimit + carousel + '\n'
+        text = ax1 + DELIMIT + ax2 + DELIMIT + ax3 + DELIMIT + ax4 + DELIMIT + ax5 + DELIMIT \
+               + ax6 + DELIMIT + gripper + DELIMIT + carousel + '\n'
         print('add scenario point', text)
         self.textEditScenario.insertPlainText(text)
 
@@ -802,7 +812,7 @@ END''')  # Назначаем стартовый текст
         i = 0
         for line in t[:-1]:
             # try:
-            line = line.split(delimit)
+            line = line.split(DELIMIT)
             print('line', line)
             delay = self.finding_longest_way(last_axes, line)
             last_axes = line

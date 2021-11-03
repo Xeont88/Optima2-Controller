@@ -1320,7 +1320,7 @@ color: black;
         <normaloff>:/Optima2/src/stop-100.png</normaloff>:/Optima2/src/stop-100.png</iconset>
       </property>
      </widget>
-     <widget class="QLabel" name="connectLabel_2">
+     <widget class="QLabel" name="MV_status_label">
       <property name="geometry">
        <rect>
         <x>410</x>
