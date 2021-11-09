@@ -42,6 +42,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -54,7 +57,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -107,6 +110,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Установить</string>
          </property>
@@ -175,6 +181,9 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEdit_6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
@@ -321,6 +330,9 @@
        </item>
        <item>
         <widget class="QSlider" name="servoSlider6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimum">
           <number>-90</number>
          </property>
@@ -461,6 +473,9 @@
        </item>
        <item>
         <widget class="QLabel" name="label_10">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Ось 6</string>
          </property>
@@ -496,13 +511,13 @@
      <attribute name="title">
       <string>Управление компонентами</string>
      </attribute>
-     <widget class="QWidget" name="layoutWidget">
+     <widget class="QGroupBox" name="sound_groupBox">
       <property name="geometry">
        <rect>
         <x>30</x>
         <y>40</y>
-        <width>221</width>
-        <height>261</height>
+        <width>181</width>
+        <height>231</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -605,7 +620,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_3">
+     <widget class="QGroupBox" name="verticalGroupBox_3">
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -757,7 +772,7 @@
      <widget class="QCheckBox" name="checkBox_LED_13">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>250</x>
         <y>50</y>
         <width>71</width>
         <height>18</height>
@@ -768,6 +783,19 @@
       </property>
       <property name="text">
        <string>LASER</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="set_sound_button">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>280</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Отправить</string>
       </property>
      </widget>
     </widget>
@@ -1108,16 +1136,16 @@ p, li { white-space: pre-wrap; }
             <item>
              <widget class="QPushButton" name="compileBtn">
               <property name="styleSheet">
-               <string notr="true">background-color:#cccccc;
-color:orange;
+               <string notr="true">background-color: #cccccc;
+color: black;
 </string>
               </property>
               <property name="text">
                <string/>
               </property>
               <property name="icon">
-               <iconset>
-                <normaloff>:/Optima2/code.png</normaloff>:/Optima2/code.png</iconset>
+               <iconset resource="resource.qrc">
+                <normaloff>:/Optima2/src/code.png</normaloff>:/Optima2/src/code.png</iconset>
               </property>
               <property name="iconSize">
                <size>

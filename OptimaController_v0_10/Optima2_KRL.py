@@ -1,6 +1,6 @@
 import design_v0_11
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem, QButtonGroup
 import os, signal, subprocess
 from PyQt5.QtGui import QIcon
 from PyQt5.QtSerialPort import QSerialPort, QSerialPortInfo
@@ -132,10 +132,15 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.lineEdit_4.returnPressed.connect(self.servo_set_func)
         self.pushButton_5.clicked.connect(self.servo_set_func)
         self.lineEdit_5.returnPressed.connect(self.servo_set_func)
-        self.pushButton_6.clicked.connect(self.servo_set_func)
-        self.lineEdit_6.returnPressed.connect(self.servo_set_func)
+        # self.pushButton_6.clicked.connect(self.servo_set_func)
+        # self.lineEdit_6.returnPressed.connect(self.servo_set_func)
         self.pushButton_7.clicked.connect(self.servo_set_func)
         self.lineEdit_7.returnPressed.connect(self.servo_set_func)
+        self.pushButton_8.clicked.connect(self.servo_set_func)
+        self.lineEdit_8.returnPressed.connect(self.servo_set_func)
+
+        self.checkBox_LED_13.clicked.connect(lambda: self.led_control(self.checkBox_LED_13.isChecked()))
+        self.tabWidget.setTabEnabled(4, False)  # enable/disable the tab
 
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
         self.plus_button.clicked.connect(self.add_point_in_scenario)
@@ -148,6 +153,20 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
 
         self.compileBtn.clicked.connect(self.parser)  # Если нажали "compile", то начинаем парсить
 
+        self.sound_groupBox = QButtonGroup()
+        self.sound_groupBox.addButton(self.radioButton_mute)
+        self.sound_groupBox.addButton(self.radioButton_1)
+        self.sound_groupBox.addButton(self.radioButton_2)
+        self.sound_groupBox.addButton(self.radioButton_3)
+        self.sound_groupBox.addButton(self.radioButton_4)
+        self.sound_groupBox.addButton(self.radioButton_5)
+        self.set_sound_button.clicked.connect(self.set_sound)
+
+    def set_sound(self):
+         # почему-то id начинается с -2 и идет вниз
+        sound = - (self.sound_groupBox.checkedId()+2)
+        print(sound)
+        self.serial_send([5,str(sound)])    # df-player
 
     def stop_MV_script(self):
         while self.flag:
@@ -480,24 +499,29 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
                           0])
 
     def led_control(self, val):
+        if val == True:
+            val = 1
+        elif val == False:
+            val = 0
         if val == 2:
             val = 1
         s = [0, val, 0]
-        txs = ''
-        for val in s:
-            txs += str(val)
-            txs += ','
-        txs = txs[:-1]
-        txs += ';'
-        self.serial.write(txs.encode())
+        self.serial_send([0, val, 0])
+        # txs = ''
+        # for val in s:
+        #     txs += str(val)
+        #     txs += ','
+        # txs = txs[:-1]
+        # txs += ';'
+        # self.serial.write(txs.encode())
 
     # TODO: не закончено
-    def DFPlayer(self):
-        button = self.sender
-        try:
-            print(button.text)
-        except:
-            pass
+    # def DFPlayer(self):
+    #     button = self.sender
+    #     try:
+    #         print(button.text)
+    #     except:
+    #         pass
 
     def RGB_control(self):
         # r = int(ui.slider_r.value()*ui.light_slider.value()/100)
@@ -659,15 +683,16 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
                 self.lineEdit_5.insert('-90')
             self.servoSlider5.setSliderPosition(int(self.axis_list[4]))
 
-            if int(self.axis_list[5]) > 90:
-                self.axis_list[5] = 90
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('90')
-            if int(self.axis_list[5]) < -90:
-                self.axis_list[5] = -90
-                self.lineEdit_6.selectAll()
-                self.lineEdit_6.insert('-90')
-            self.servoSlider6.setSliderPosition(int(self.axis_list[5]))
+            # TODO: uncomment to enable 6th axis
+            # if int(self.axis_list[5]) > 90:
+            #     self.axis_list[5] = 90
+            #     self.lineEdit_6.selectAll()
+            #     self.lineEdit_6.insert('90')
+            # if int(self.axis_list[5]) < -90:
+            #     self.axis_list[5] = -90
+            #     self.lineEdit_6.selectAll()
+            #     self.lineEdit_6.insert('-90')
+            # self.servoSlider6.setSliderPosition(int(self.axis_list[5]))
 
             if int(self.axis_list[6]) > 100:
                 self.axis_list[6] = 100
