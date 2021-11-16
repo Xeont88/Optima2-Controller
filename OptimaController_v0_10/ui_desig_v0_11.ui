@@ -140,7 +140,7 @@
         <x>466</x>
         <y>10</y>
         <width>51</width>
-        <height>321</height>
+        <height>311</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -543,7 +543,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Композиция 1</string>
+          <string>Трек 1</string>
          </property>
          <property name="checked">
           <bool>false</bool>
@@ -556,7 +556,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Композиция 2</string>
+          <string>Трек 2</string>
          </property>
          <property name="checked">
           <bool>false</bool>
@@ -569,7 +569,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Композиция 3</string>
+          <string>Трек 3</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -585,7 +585,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Композиция 4</string>
+          <string>Трек 4</string>
          </property>
          <property name="checked">
           <bool>false</bool>
@@ -598,7 +598,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Композиция 5</string>
+          <string>Трек 5</string>
          </property>
          <property name="checked">
           <bool>false</bool>
