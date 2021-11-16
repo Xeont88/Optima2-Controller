@@ -85,13 +85,20 @@ void loop() {
     data.parseInts(ints);
 
     switch (ints[0]) {
-      // управление LASER
+      // ****************** управление LASER ******************
       case 0:
         digitalWrite(LASER_PIN, ints[1]);
-        Serial.print(ints[1]);
+        //        Serial.print(ints[1]);
+        if (ints[1]) {
+          mp3_stop();
+          delay (100);
+          mp3_play_physical(2);
+        } else {
+          mp3_stop();
+        }
         break;
 
-      // управление двигателями
+      // ****************** управление двигателями ******************
       case 1:
         if (stepper1.currentPosition() != ints[1])
           stepper1.moveTo(ints[1] * 88);
@@ -110,7 +117,7 @@ void loop() {
         running = true;   // робот начал движение
         break;
 
-      // управление адресной LED лентой
+      // ****************** управление адресной LED лентой ******************
       case 2:
         for (int i = 0; i < NUM_LEDS; i++) {
           leds[i] = CRGB(ints[1], ints[2], ints[3]);
@@ -118,7 +125,7 @@ void loop() {
         FastLED.show();
         break;
 
-      // управление DF-player
+      // ****************** управление DF-player ******************
       case 5:     // 5, 3;
         Serial.print(ints[1]);
         if (ints[1] == 0)
@@ -135,24 +142,27 @@ void loop() {
     }
   }
 
+  stepper1.run();
+  stepper2.run();
+  stepper3.run();
+  stepper4.run();
+  stepper5.run();
+  bool is_gripper_run = servo_gripper.tick();   // здесь происходит движение серво по встроенному таймеру!
+  stepper7.run();
+
   // Если все приводы завершили движение
   if (stepper1.distanceToGo() == 0 &&
       stepper2.distanceToGo() == 0 &&
       stepper3.distanceToGo() == 0 &&
       stepper4.distanceToGo() == 0 &&
       stepper5.distanceToGo() == 0 &&
+      is_gripper_run               &&
       stepper7.distanceToGo() == 0 && running) {
     Serial.println("Ok");
     running = false;
   }
 
-  stepper1.run();
-  stepper2.run();
-  stepper3.run();
-  stepper4.run();
-  stepper5.run();
-  servo_gripper.tick();   // здесь происходит движение серво по встроенному таймеру!
-  stepper7.run();
+
 }
 
 

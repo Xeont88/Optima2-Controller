@@ -166,7 +166,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
          # почему-то id начинается с -2 и идет вниз
         sound = - (self.sound_groupBox.checkedId()+2)
         print(sound)
-        self.serial_send([5,str(sound)])    # df-player
+        self.serial_send([5,str(sound),0])    # df-player
 
     def stop_MV_script(self):
         while self.flag:
@@ -288,7 +288,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
             data = f.read()
             print(data)
             self.textEditScenario.selectAll()
-            self.textEditScenario.setText(data)
+            self.textEditScenario.setPlainText(data)
             f.close()
         except:
             pass
@@ -301,13 +301,15 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         print(fname)
         try:
             # Тут есть ошибка с библиотекой log4cplus, как то связано с тем, что на компе установлен Autodesk 360
-            print('open')
+            # fname = fname[0]
+            # fname = fname[fname.rfind('/')+1:]
             f = open(fname[0], 'w')
+            print('open', fname)
             # with f:
             # self.textEditScenario.selectAll()
-            data = self.textEditScenario.getText()
+            data = self.textEditScenario.toPlainText()
+            print(data)
             f.write(data)
-            # print(data)
             f.close()
         except:
             print('.scn file not saved')
@@ -393,7 +395,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         rxs = str(rx, 'utf-8').strip()
         data = rxs.split(' ')
         print('Robot answer >', data[0])
-        if data[0] == 'Ok':
+        if data[0] == 'O':      # if 'Ok'
             self.robot_moving = False
 
     def on_open2(self):
@@ -446,7 +448,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         for val in data:
             txs += str(val)
             txs += ','
-        txs = txs[:-1]
+        txs = txs[:-1] + ',0'
         txs += ';'
         self.serial.write(txs.encode())
         self.serial.waitForBytesWritten(10)
