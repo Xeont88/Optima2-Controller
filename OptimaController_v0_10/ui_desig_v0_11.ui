@@ -111,7 +111,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_6">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Установить</string>
@@ -182,7 +182,7 @@
        <item>
         <widget class="QLineEdit" name="lineEdit_6">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -331,7 +331,7 @@
        <item>
         <widget class="QSlider" name="servoSlider6">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="minimum">
           <number>-90</number>
@@ -474,7 +474,7 @@
        <item>
         <widget class="QLabel" name="label_10">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Ось 6</string>

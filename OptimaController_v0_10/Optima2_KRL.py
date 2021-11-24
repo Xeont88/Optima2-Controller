@@ -132,15 +132,15 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.lineEdit_4.returnPressed.connect(self.servo_set_func)
         self.pushButton_5.clicked.connect(self.servo_set_func)
         self.lineEdit_5.returnPressed.connect(self.servo_set_func)
-        # self.pushButton_6.clicked.connect(self.servo_set_func)
-        # self.lineEdit_6.returnPressed.connect(self.servo_set_func)
+        self.pushButton_6.clicked.connect(self.servo_set_func)
+        self.lineEdit_6.returnPressed.connect(self.servo_set_func)
         self.pushButton_7.clicked.connect(self.servo_set_func)
         self.lineEdit_7.returnPressed.connect(self.servo_set_func)
         self.pushButton_8.clicked.connect(self.servo_set_func)
         self.lineEdit_8.returnPressed.connect(self.servo_set_func)
 
         self.checkBox_LED_13.clicked.connect(lambda: self.led_control(self.checkBox_LED_13.isChecked()))
-        self.tabWidget.setTabEnabled(4, False)  # enable/disable the tab
+        # self.tabWidget.setTabEnabled(4, False)  # enable/disable the tab
 
         self.addPointButton.clicked.connect(self.add_point_in_scenario)
         self.plus_button.clicked.connect(self.add_point_in_scenario)
@@ -149,7 +149,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.home_button.clicked.connect(self.go_home)
         self.play_button_vision.clicked.connect(self.start_MV_script)
         self.stop_button_vision.clicked.connect(self.stop_MV_script)
-        self.photo_cam_button.clicked.connect(MakePhoto.make_photo)
+        self.photo_cam_button.clicked.connect(self.make_photo)
 
         self.compileBtn.clicked.connect(self.parser)  # Если нажали "compile", то начинаем парсить
 
@@ -161,6 +161,12 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
         self.sound_groupBox.addButton(self.radioButton_4)
         self.sound_groupBox.addButton(self.radioButton_5)
         self.set_sound_button.clicked.connect(self.set_sound)
+
+    def make_photo(self):
+        reply = QMessageBox.question(self, 'Внимание!',
+                                     'Для использования технического зрения подключите камеру к компьютеру, \nи нажмите кнопку "OK"',
+                                     QMessageBox.Ok | QMessageBox.Ok)  # QMessageBox.Cancel,
+        MakePhoto.make_photo()
 
     def set_sound(self):
          # почему-то id начинается с -2 и идет вниз
@@ -251,7 +257,7 @@ class Optima2Controller(QMainWindow, design_v0_11.Ui_MainWindow, Gamepad, CD):
     def MV_script(self):
         self.cap = cv2.VideoCapture(0)
         self.MV_status_label.setText('В работе')
-        # TODO: открытие окна видео, при повторном запуске.
+
         while self.MV_script_flag:
             try:
                 self.flag = True

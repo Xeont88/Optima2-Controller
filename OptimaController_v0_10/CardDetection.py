@@ -4,7 +4,7 @@ import os
 
 
 class CardDetection:
-    FILES_DIRECTORY = 'images/cards/sample/'
+    FILES_DIRECTORY = 'source/'
 
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
