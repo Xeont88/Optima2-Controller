@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="Optima2">
+    <file>src/picture.png</file>
+    <file>src/add.png</file>
+    <file>src/stop-100.png</file>
+    <file>src/code.png</file>
+    <file>src/connected.png</file>
+    <file>src/disconnected.png</file>
+    <file>src/home.png</file>
+    <file>src/play.png</file>
+    <file>src/camera.png</file>
+    <file>src/refresh.png</file>
+    <file>src/stop.png</file>
+    <file>src/sync.png</file>
+    <file>src/zarnitza64g.ico</file>
+  </qresource>
+</RCC>

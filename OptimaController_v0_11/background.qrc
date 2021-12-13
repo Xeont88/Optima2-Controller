@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>icon_1.png</file>
+    <file>denise-bossarte-8rEJiVQk1Vw-unsplash.jpg</file>
+    <file>icons8-close-window-96.png</file>
+    <file>icons8-code-80.png</file>
+    <file>icons8-save-as-96.png</file>
+  </qresource>
+</RCC>
