@@ -19,4 +19,7 @@ OptimaController_v0.7/dist/
 OptimaController_v0_10/dist/
 *scn
 *krl
+*.avi
+/OptimaController_v0_11/dist/
+/OptimaController_v0_11/.idea/
 
