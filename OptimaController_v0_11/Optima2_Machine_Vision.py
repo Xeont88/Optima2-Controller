@@ -787,7 +787,7 @@ class Optima2Controller(QMainWindow, design_v0_12.Ui_MainWindow, Gamepad, CD):
         self.run = ret
         while self.run:
             # QThread.sleep(100)
-            time.sleep(0.1)
+            time.sleep(0.03)
             if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():  # detect ESC
                 run = False
 
