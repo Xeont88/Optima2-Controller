@@ -1,0 +1,11 @@
+DEF my_program()
+
+DECL POS HOME
+INI
+HOME = {A1 0, A2 0, A3 90, A4 0, A5 0}
+
+PTP HOME
+
+PTP HOME
+
+END
