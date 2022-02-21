@@ -729,7 +729,11 @@ class Optima2Controller(QMainWindow, design_v0_12.Ui_MainWindow, Gamepad, CD):
                 self.lineEdit_8.insert('-360')
             self.servoSlider8.setSliderPosition(int(self.axis_list[7]))
 
+            temp = self.checkBox_vacuum_pump.isChecked()
             self.checkBox_vacuum_pump.setChecked(self.axis_list[8])
+            if self.checkBox_vacuum_pump.isChecked() != temp:
+                self.servo_control()
+
 
         except:
             print("don't do that!")
@@ -787,7 +791,7 @@ class Optima2Controller(QMainWindow, design_v0_12.Ui_MainWindow, Gamepad, CD):
         self.run = ret
         while self.run:
             # QThread.sleep(100)
-            time.sleep(0.03)
+            time.sleep(0.06)
             if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():  # detect ESC
                 run = False
 

@@ -40,7 +40,7 @@ void setup() {
   stepper3.setMaxSpeed(2000);
   stepper4.setMaxSpeed(4000);
   stepper5.setMaxSpeed(800);
-  stepper7.setMaxSpeed(1000);
+  stepper7.setMaxSpeed(140);
 
   servo_axis_6.attach(SERVO_AXIS_6, 600, 2400);  // 600 и 2400 - длины импульсов, при которых
   servo_axis_6.setSpeed(180);   // ограничить скорость
@@ -57,7 +57,7 @@ void setup() {
   stepper3.setAcceleration(2000);
   stepper4.setAcceleration(2000);
   stepper5.setAcceleration(2000);
-  stepper7.setAcceleration(2000);
+  stepper7.setAcceleration(4000);
 
 
   stepper1.setCurrentPosition(0 * 88);
@@ -65,7 +65,7 @@ void setup() {
   stepper3.setCurrentPosition(0 * 98);
   stepper4.setCurrentPosition(0 * 46);
   stepper5.setCurrentPosition(0 * 20);
-  stepper7.setCurrentPosition(0 * 8.9);
+  stepper7.setCurrentPosition(0 * 1);
 
   Serial.begin(115200);
   while (!Serial);
@@ -78,7 +78,7 @@ void setup() {
   mySerial.begin (9600);
   mp3_set_serial (mySerial);  //set softwareSerial for DFPlayer-mini mp3 module
   delay (100);
-  mp3_set_volume (10);
+  mp3_set_volume (30);
 
 }
 
@@ -122,11 +122,11 @@ void loop() {
         if (stepper5.currentPosition() != ints[5])
           stepper5.moveTo(ints[5] * 20);
           
-        servo_axis_6.setTargetDeg(ints[6]+120);
+        servo_axis_6.setTargetDeg(ints[6]+90);
         
         servo_gripper.setTargetDeg(ints[7]+80);
         if (stepper7.currentPosition() != ints[8])
-          stepper7.moveTo(ints[8] * 8.9);       //  8.9 - коэфициент - "шаги в градусы"
+          stepper7.moveTo(ints[8] * 1.11);       //  8.9 - коэфициент - "шаги в градусы"
 
         if (ints[9] != 9)   // если движение "домой", не менять состояние воздушной помпы
         digitalWrite(PUMP_PIN, ints[9]);
@@ -151,9 +151,9 @@ void loop() {
           mp3_stop();
           delay (100);
           mp3_play_physical(ints[1]);
-          if (ints[1] == 4) {
-            rom_dom_dom();
-          }
+//          if (ints[1] == 4) {
+//            rom_dom_dom();
+//          }
         }
         break;
     }
